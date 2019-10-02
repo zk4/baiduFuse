@@ -26,7 +26,7 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
 - [ ] support write / delete to cloud
 
 
-## gochta
+## tips
 ### mpv (ftp on fuse)
 https://github.com/mpv-player/mpv/issues/5449
 
