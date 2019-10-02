@@ -39,3 +39,5 @@ nosetests.xml
 tmp/**
 cache/**
 .cache/**
+learn/**
+.vscode/**
