@@ -7,23 +7,21 @@ import os
 import sys
 import math
 import json
-
+import time
 from diskcache import Cache
 from io import BytesIO
+import logging
 try:
     import _find_fuse_parts
 except ImportError:
     pass
-import logging
-from log import funcLog,logger
-import time
-
 from fuse import FUSE, FuseOSError, Operations
-
 from termcolor import colored
 from colorama import Fore, Back, Style, init
 from concurrent.futures  import ThreadPoolExecutor as Pool
 
+
+from log import funcLog,logger
 from cloud.baidu import PCS 
 from core.task  import Task
 
