@@ -31,7 +31,7 @@ from core.task  import Task
 dirReaderDaemon = Pool(1)
 pool = Pool(5)
 
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 class NoSuchRowException(Exception):
     pass
@@ -79,7 +79,7 @@ class CloudFS(Operations):
 
         self.downloading_files = {}
         # update all folder  inother thread
-        dirReaderDaemon.submit(self.readdirAsync,"/",True,dirReaderDaemon)  
+        dirReaderDaemon.submit(self.readdirAsync,"/",100,dirReaderDaemon)  
 
     def unlink(self, path):
         self.disk.delete([path])
@@ -129,7 +129,7 @@ class CloudFS(Operations):
             return self.buffer[path].getDict()
 
 
-    def readdirAsync(self,path,recursive=False,threadPool=pool):
+    def readdirAsync(self,path,depth=2,threadPool=pool):
         try:
             foo = json.loads(self.disk.list_files(path))
         except Exception as s:
@@ -167,11 +167,12 @@ class CloudFS(Operations):
             for file_info in ret['info']:
                 logger.debug(file_info)
                 self._add_file_to_buffer(file_info['path'],file_info)
-                if recursive:
+                if depth >0:
+                    depth-=1
                     if file_info['isdir']:
                         if file_info['path'] not in self.traversed_folder:
                             self.traversed_folder[path] = True
-                            threadPool.submit(self.readdirAsync,file_info['path'],True)  
+                            threadPool.submit(self.readdirAsync,file_info['path'],depth,threadPool)  
         self.dir_buffer[path]=files
 
 
@@ -179,7 +180,7 @@ class CloudFS(Operations):
     def readdir(self, path, offset):
 #         if path not in self.traversed_folder:
         self.traversed_folder[path] = True
-        pool.submit(self.readdirAsync,path,False,pool)  
+        pool.submit(self.readdirAsync,path,2,pool)  
         if path  in self.dir_buffer:
             for r in self.dir_buffer[path]:
                 yield r
