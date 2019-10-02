@@ -7,7 +7,9 @@
 
 
 ## cloud driver support
-- [x] 百度盘, support only read, highly optimized for media stream.
+- [x] 百度盘 
+ - support only read, highly optimized for media stream.
+ - auto fetch credential from Chrome browser
 
 Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull request.
 ## usage 
