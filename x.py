@@ -137,7 +137,7 @@ class CloudFS(Operations):
 
         files = ['.', '..']
         abs_files = []
-        if foo['errno'] != 0:
+        if 'errno' in foo:
             logger.error("maybe token is not right, try re login http://pan.baidu.com in Chrome")
         if "list" not in foo:
             logger.info("no list")
