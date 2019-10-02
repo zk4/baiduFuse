@@ -31,7 +31,7 @@ from core.task  import Task
 dirReaderDaemon = Pool(1)
 pool = Pool(5)
 
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 class NoSuchRowException(Exception):
     pass
