@@ -31,7 +31,7 @@ from core.task  import Task
 dirReaderDaemon = Pool(1)
 pool = Pool(5)
 
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 class NoSuchRowException(Exception):
     pass
@@ -177,9 +177,9 @@ class CloudFS(Operations):
 
     
     def readdir(self, path, offset):
-        if path not in self.traversed_folder:
-            self.traversed_folder[path] = True
-            pool.submit(self.readdirAsync,path,False,pool)  
+#         if path not in self.traversed_folder:
+        self.traversed_folder[path] = True
+        pool.submit(self.readdirAsync,path,False,pool)  
         if path  in self.dir_buffer:
             for r in self.dir_buffer[path]:
                 yield r
