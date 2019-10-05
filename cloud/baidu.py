@@ -26,13 +26,26 @@ class PCS():
             sys.exit()
         self.header={'User-Agent': self.user_agent,'cookie':"BDUSS="+   self.BDUSS}
     def delete(self,paths):
-        pass
+        url = "http://pcs.baidu.com/rest/2.0/pcs/file"
+        querystring = {"app_id":self.app_id,"method":"delete"}
+        formatPaths = json.dumps(list(map(lambda p : {"path":p}, paths)))
+        payload = "--a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942\nContent-Disposition: form-data; name=\"param\"\n\n{\"list\":"+formatPaths+"}\n--a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942--\n"
+
+        headers = {
+            'host': "pcs.baidu.com",
+            'User-Agent':self.user_agent,
+            'Content-Type': "multipart/form-data; boundary=a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942",
+            'cookie': "BDUSS="+self.BDUSS
+        }
+        response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
+
+        print(response.text)
     def list_files(self,path):
         url = "http://pcs.baidu.com/rest/2.0/pcs/file"
         querystring = {"app_id":self.app_id,"by":"name","limit":"0-2147483647","method":"list","order":"asc","path":path}
         headers = {
             'host': "pcs.baidu.com",
-            'user-agent':self.user_agent,
+            'User-Agent':self.user_agent,
             'cookie': "BDUSS="+self.BDUSS
         }
 

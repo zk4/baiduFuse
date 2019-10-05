@@ -226,8 +226,16 @@ class CloudFS(Operations):
             return None
         return d
 
+    def unlink(self, path):
+        # sitll ongoing
+        self.disk.delete([path])
+        
 
-    access = None
+
+    def access(self, path, amode):
+        return 0
+
+
     statfs = None
 
 if __name__ == '__main__':
