@@ -228,16 +228,19 @@ class CloudFS(Operations):
             return None
         return d
 
-    def unlink(self, path):
-        # sitll ongoing
-	# update cache
-        self.disk.delete([path])
-
+    def updateCacheAfterDeletion(self, path):
         parentPath = path[:path.rfind("/")]
         delKey = path[path.rfind("/")+1:]
         newList= self.dir_buffer[parentPath]
         newList.remove(delKey)
         self.dir_buffer[parentPath]= newList
+        
+    def unlink(self, path):
+        # sitll ongoing
+	# update cache
+        self.disk.delete([path])
+        self.updateCacheAfterDeletion(path) 
+
         
 	
 
@@ -248,6 +251,7 @@ class CloudFS(Operations):
 
     def rmdir(self, path):
         self.disk.delete([path])
+        self.updateCacheAfterDeletion(path) 
 
     statfs = None
 
