@@ -230,6 +230,9 @@ class CloudFS(Operations):
 
     def updateCacheAfterDeletion(self, path):
         parentPath = path[:path.rfind("/")]
+        if parentPath=="":
+            parentPath="/"
+        logger.info(f'parentPath: {parentPath}')
         delKey = path[path.rfind("/")+1:]
         newList= self.dir_buffer[parentPath]
         newList.remove(delKey)
