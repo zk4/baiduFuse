@@ -8,6 +8,7 @@ import sys
 import math
 import json
 import time
+import time
 from diskcache import Cache
 from io import BytesIO
 import logging
@@ -180,6 +181,7 @@ class CloudFS(Operations):
         self.traversed_folder[path] = True
         pool.submit(self.readdirAsync,path,2,pool)  
         if path  in self.dir_buffer:
+#             logger.info(f'{path},{self.dir_buffer[path]}')
             for r in self.dir_buffer[path]:
                 yield r
         else:
@@ -228,13 +230,24 @@ class CloudFS(Operations):
 
     def unlink(self, path):
         # sitll ongoing
+	# update cache
         self.disk.delete([path])
+
+        parentPath = path[:path.rfind("/")]
+        delKey = path[path.rfind("/")+1:]
+        newList= self.dir_buffer[parentPath]
+        newList.remove(delKey)
+        self.dir_buffer[parentPath]= newList
         
+	
 
 
     def access(self, path, amode):
         return 0
 
+
+    def rmdir(self, path):
+        self.disk.delete([path])
 
     statfs = None
 
