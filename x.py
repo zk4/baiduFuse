@@ -239,18 +239,11 @@ class CloudFS(Operations):
         self.dir_buffer[parentPath]= newList
         
     def unlink(self, path):
-        # sitll ongoing
-	# update cache
         self.disk.delete([path])
         self.updateCacheAfterDeletion(path) 
 
-        
-	
-
-
     def access(self, path, amode):
         return 0
-
 
     def rmdir(self, path):
         self.disk.delete([path])
