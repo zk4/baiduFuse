@@ -41,3 +41,4 @@ cache/**
 .cache/**
 learn/**
 .vscode/**
+.idea/**
