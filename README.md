@@ -12,7 +12,7 @@
 
 ## cloud driver support
 - [x] 百度盘 
- - support only read and delete, highly optimized for media stream.
+ - support read , delete, mv(rename) , highly optimized for media stream.
  - auto fetch credential from Chrome browser
 
 Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull request.

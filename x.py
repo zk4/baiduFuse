@@ -228,7 +228,7 @@ class CloudFS(Operations):
             return None
         return d
 
-    def updateCacheAfterDeletion(self, path,newPath=None):
+    def deleteCache(self, path):
         parentPath = path[:path.rfind("/")]
         if parentPath=="":
             parentPath="/"
@@ -236,26 +236,31 @@ class CloudFS(Operations):
         delKey = path[path.rfind("/")+1:]
         newList= self.dir_buffer[parentPath]
         newList.remove(delKey)
-        if newPath:
-            newPath=newPath[newPath.rfind('/')+1:] 
-            newList.append(newPath)
         self.dir_buffer[parentPath]= newList
         
+    def updateCahe(self,old, new):
+        self.deleteCache(old)
+        parentPath = new[:new.rfind("/")]
+        newList= self.dir_buffer[parentPath]
+        filename=new[new.rfind('/')+1:] 
+        newList.append(filename)
+        self.dir_buffer[parentPath]= newList
+
     def unlink(self, path):
         self.disk.delete([path])
-        self.updateCacheAfterDeletion(path) 
+        self.deleteCache(path) 
 
     def access(self, path, amode):
         return 0
 
     def rmdir(self, path):
         self.disk.delete([path])
-        self.updateCacheAfterDeletion(path) 
+        self.deleteCache(path) 
 
     @funcLog
     def rename(self, old, new):
         self.disk.rename(old,new)
-        self.updateCacheAfterDeletion(old,new)
+        self.updateCahe(old,new)
 
     statfs = None
 
