@@ -71,7 +71,6 @@ class CloudFS(Operations):
     def __init__(self,  *args, **kw):
         self.buffer = Cache('./cache/buffer')
         self.dir_buffer = Cache('./cache/dir_buffer')
-        self.file_cache = Cache('./cache/file_cache')
 
         self.traversed_folder = {}
         self.disk = PCS()
@@ -79,9 +78,6 @@ class CloudFS(Operations):
         self.downloading_files = {}
         # update all folder  inother thread
         dirReaderDaemon.submit(self.readdirAsync,"/",100,dirReaderDaemon)  
-
-    def unlink(self, path):
-        self.disk.delete([path])
 
 
     def _add_file_to_buffer(self, path,file_info):
@@ -107,6 +103,7 @@ class CloudFS(Operations):
         self.buffer.pop(path)
 
 
+    
     def getattr(self, path, fh=None):
         
         if path.split("/")[-1].startswith("."):
@@ -176,6 +173,7 @@ class CloudFS(Operations):
 
 
     
+    
     def readdir(self, path, offset):
 #         if path not in self.traversed_folder:
         self.traversed_folder[path] = True
@@ -189,6 +187,7 @@ class CloudFS(Operations):
             for r in files:
                 yield r
 
+    
     def open(self, path, flags):
         # method does not have thread race problem, open by one thread only
         try:
@@ -228,41 +227,62 @@ class CloudFS(Operations):
             return None
         return d
 
-    def deleteCache(self, path):
-        parentPath = path[:path.rfind("/")]
-        if parentPath=="":
-            parentPath="/"
-        logger.info(f'parentPath: {parentPath}')
-        delKey = path[path.rfind("/")+1:]
-        newList= self.dir_buffer[parentPath]
-        newList.remove(delKey)
-        self.dir_buffer[parentPath]= newList
-        
-    def updateCahe(self,old, new):
-        self.deleteCache(old)
-        parentPath = new[:new.rfind("/")]
-        newList= self.dir_buffer[parentPath]
-        filename=new[new.rfind('/')+1:] 
-        newList.append(filename)
-        self.dir_buffer[parentPath]= newList
 
+    def updateCahe(self,old, new):
+        directory = old[:old.rfind("/")]
+        filename  = old[old.rfind("/")+1:]
+        if len(directory) == 0:
+            directory="/"
+        if not new:
+            oldCache = self.dir_buffer[directory]
+            if filename in oldCache:
+                oldCache.remove(filename)
+                self.dir_buffer[directory] = oldCache
+            if old in self.buffer:
+                self.buffer.pop(old)
+        else:
+            oldCache = self.dir_buffer[directory]
+            if filename in oldCache:
+                oldCache.remove(filename)
+                newfilename  = new[new.rfind("/")+1:]
+                oldCache.append(newfilename)
+                self.dir_buffer[directory]=oldCache
+            if old in self.buffer:
+                old_info = self.buffer.pop(old)
+                self.buffer[new] = old_info
+
+    @funcLog
     def unlink(self, path):
         self.disk.delete([path])
-        self.deleteCache(path) 
+        self.updateCahe(path,None)
 
+    
     def access(self, path, amode):
         return 0
 
+    @funcLog
     def rmdir(self, path):
         self.disk.delete([path])
-        self.deleteCache(path) 
+        self.updateCahe(path,None)
 
     @funcLog
     def rename(self, old, new):
         self.disk.rename(old,new)
         self.updateCahe(old,new)
+    
+    @funcLog
+    def create(self, path, mode, fi=None):
 
-    statfs = None
+        '''
+        When raw_fi is False (default case), fi is None and create should
+        return a numerical file handle.
+
+        When raw_fi is True the file handle should be set directly by create
+        and return 0.
+        '''
+        return 999999
+
+#     statfs = None
 
 if __name__ == '__main__':
     logger.info(colored("- fuse 4 cloud driver -", 'red'))

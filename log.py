@@ -11,7 +11,7 @@ def funcLog(func):
 
 logger = logging.getLogger('cloud-fuse')
 formatter = logging.Formatter(
-        '%(filename)s:%(lineno)d %(threadName)s %(levelname)s -> %(message)s',)
+        '%(filename)s:%(lineno)d  %(levelname)s -> %(message)s',)
 stream_handler = logging.StreamHandler(sys.stderr)
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
