@@ -25,10 +25,10 @@ class Task(object):
 
 
     @staticmethod
-    def createHelperThread(start,end,task):
+    def createHelperThread(startIdx,endIdx,task):
         isPreviewAble = task.isPreviewAble
         preDownloadPart = 30 if isPreviewAble else 30
-        for i in range(start,end+preDownloadPart):
+        for i in range(startIdx,endIdx+preDownloadPart):
             if i >= len(task.cache):
                 break
 
@@ -142,16 +142,15 @@ class Task(object):
 
     def create_range(self):
         start = 0
-        end = self.part_size -1
+        size = self.part_size
 
         while start < self.file_size:
-            if end>= self.file_size:
-                end = self.file_size -1
-            self.cache.append({"status":None,"start":start,"end":end,"cur":0,"m":threading.Condition() })
-            if end == self.file_size -1:
+            if start+size> self.file_size:
+                size = start+size-self.file_size
+            self.cache.append({"status":None,"start":start,"size":size,"cur":0,"m":threading.Condition() })
+            if size == start+size-self.file_size:
                 break
             start += self.part_size
-            end   += self.part_size
 
     def terminate(self):
         self.terminating = True
