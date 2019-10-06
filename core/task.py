@@ -81,17 +81,21 @@ class Task(object):
                 if  r[0] == r[1]:
                     if c["cur"]+c["start"]>=(size+offset):
                         # tiny data
-    #                     logger.debug(f"tiny data found,{c['cur']}/{c['end']-c['start']+1} ")
+#                         logger.info(f"tiny data found,{self.saved_path} - {c} ")
                         return self.m[offset:offset+size]
                     else:
                         with c["m"]:
                             c["m"].wait(1)
                 else:
+                    alldone = True
                     for i in range(r[0],r[1]+1):
                         if self.cache[i]["status"] != "done":
+                            alldone=False
                             with self.cache[i]["m"]:
                                 self.cache[i]["m"].wait(1)
-                    else:
+
+                    if alldone:
+                        logger.info(f'range - {r}')
                         return self.m[offset:offset+size]
 
 
@@ -146,9 +150,9 @@ class Task(object):
 
         while start < self.file_size:
             if start+size> self.file_size:
-                size = start+size-self.file_size
+                size = self.file_size - start
             self.cache.append({"status":None,"start":start,"size":size,"cur":0,"m":threading.Condition() })
-            if size == start+size-self.file_size:
+            if size == self.file_size - start:
                 break
             start += self.part_size
 
