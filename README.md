@@ -9,7 +9,6 @@
 ![demo](https://github.com/zk4/baiduFuse/blob/master/img/d.gif)
 
 
-
 ## cloud driver support
 - [x] 百度盘 
  - support read , delete, mv(rename) , highly optimized for media stream.
