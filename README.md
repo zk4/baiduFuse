@@ -45,6 +45,9 @@ mpv    --cache=no ftp://192.168.1.15:2121/锦绣良缘粤语Gotv/锦绣良缘19.
 ```
 
 
+## write file (beta)
+Write file is a bit trick.  fuse will call statfs/create/write/read .I need a workaround for this.
+
 ## reference 
 just for myself reference
 - [intro](https://www.stavros.io/posts/python-fuse-filesystem/)
@@ -52,3 +55,4 @@ just for myself reference
 - [stackoverflow](https://stackoverflow.com/questions/15604191/fuse-detailed-documentation)
 - [how-to-mount-and-manage-non-native-file-systems-in-os-x-with-fuse](https://www.macworld.com/article/2855038/how-to-mount-and-manage-non-native-file-systems-in-os-x-with-fuse.html)
 - [reference project ](https://github.com/joe42/CloudFusion)
+- [ly0 github](https://github.com/ly0/baidu-fuse)

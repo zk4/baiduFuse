@@ -3,8 +3,10 @@ import sys
 
 def funcLog(func):
     def wrapper(*args, **kw):
-        print(func.__name__,*args[1:])
-        return func(*args, **kw)
+        if "/test/" in args[1] :
+            print(func.__name__,*args[1:])
+        ret= func(*args, **kw)
+        return ret 
     return wrapper
 
 

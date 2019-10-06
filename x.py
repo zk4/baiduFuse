@@ -9,6 +9,7 @@ import math
 import json
 import time
 import time
+import tempfile
 from diskcache import Cache
 from io import BytesIO
 import logging
@@ -90,26 +91,18 @@ class CloudFS(Operations):
         foo['st_size'] = file_info['size']
         self.buffer[path] = foo
 
-    def emptyFileBuffer(self,path):
-        foo = File()
-        foo['st_ctime'] = 1391274570
-        foo['st_mtime'] = 1391274570
-        foo['st_mode'] =   (stat.S_IFDIR | 0x777)
-        foo['st_nlink'] =  1
-        foo['st_size'] = 1
-        return foo
 
     def _del_file_from_buffer(self,path):
         self.buffer.pop(path)
 
 
-    
     def getattr(self, path, fh=None):
         
         if path.split("/")[-1].startswith("."):
             raise FuseOSError(errno.ENOENT)
             
-        if  path not in self.buffer:
+        st = None
+        if  path not in self.buffer or self.buffer[path] is None:
             jdata = json.loads(self.disk.meta([path]))
        
             if 'info' not in jdata:
@@ -120,9 +113,11 @@ class CloudFS(Operations):
             file_info = jdata['info'][0]
             self._add_file_to_buffer(path,file_info)
             st = self.buffer[path].getDict()
-            return st
         else:
-            return self.buffer[path].getDict()
+            st= self.buffer[path].getDict()
+
+#         logger.info(f'st: {st}')
+        return st
 
 
     def readdirAsync(self,path,depth=2,threadPool=pool):
@@ -174,7 +169,7 @@ class CloudFS(Operations):
 
     
     
-    @funcLog
+#     @funcLog
     def readdir(self, path, offset):
 #         if path not in self.traversed_folder:
         self.traversed_folder[path] = True
@@ -189,6 +184,7 @@ class CloudFS(Operations):
                 yield r
 
     
+    @funcLog
     def open(self, path, flags):
         # method does not have thread race problem, open by one thread only
         try:
@@ -268,7 +264,7 @@ class CloudFS(Operations):
         self.disk.rename(old,new)
         self.updateCahe(old,new)
 
-    @funcLog
+#     @funcLog
     def mkdir(self, path, mode):
         directory = path[:path.rfind("/")]
         filename  = path[path.rfind("/")+1:]
@@ -278,23 +274,40 @@ class CloudFS(Operations):
         self.dir_buffer[directory]=cache
         self.disk.mkdir(path)
 
-#         raise FuseOSError(errno.EROFS)
-
     @funcLog
-    def create(self, path, mode, fi=None):
-        pass
+    def create(self, path, mode,fh=None):
+        foo = File()
+        foo['st_ctime'] = int(time.time())
+        foo['st_mtime'] = int(time.time())
+        foo['st_mode'] = (stat.S_IFREG | 0x777)
+        foo['st_nlink'] = 1
+        foo['st_size'] = 10000
+        self.buffer[path] = foo
+#         tmp_file = tempfile.TemporaryFile('r+w+b')
+        filename  = path[path.rfind("/")+1:]
+        self.disk.upload("/Users/zk/Downloads/"+filename,path)
+#         full_path = self._full_path(path)
+#         return os.open(full_path, os.O_WRONLY | os.O_CREAT, mode)
+#         jdata = json.loads(self.disk.meta([path]))
 
-#         '''
-#         When raw_fi is False (default case), fi is None and create should
-#         return a numerical file handle.
+#         if 'info' not in jdata:
+#             raise FuseOSError(errno.ENOENT)
+#         if jdata['errno'] != 0:
+#             raise FuseOSError(errno.ENOENT)
 
-#         When raw_fi is True the file handle should be set directly by create
-#         and return 0.
-#         '''
-#         return 0
+#         file_info = jdata['info'][0]
+#         self._add_file_to_buffer(path,file_info)
+        return 0
 
-#     statfs = None
+#     @funcLog
+    def write(self, path, data, offset, fp):
+        print("write---",len(data))
+#         self.disk.upload(path,"/test/abcdefg")
 
+#         return len(data)
+
+    def statfs(self, path):
+        return {'f_bavail': 1609287, 'f_bfree': 1673287, 'f_blocks': 60989440, 'f_bsize': 1048576, 'f_favail': 4290675908, 'f_ffree': 4290675908, 'f_files': 4294967279, 'f_flag': 0, 'f_frsize': 4096, 'f_namemax': 255}
 if __name__ == '__main__':
     logger.info(colored("- fuse 4 cloud driver -", 'red'))
     FUSE(CloudFS(),sys.argv[1],foreground=True,nonempty=False,async_read=True)
