@@ -42,3 +42,4 @@ cache/**
 learn/**
 .vscode/**
 .idea/**
+test.data
