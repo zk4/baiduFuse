@@ -25,6 +25,7 @@ class PCS():
             print("no bdus")
             sys.exit()
         self.header={'User-Agent': self.user_agent,'cookie':"BDUSS="+   self.BDUSS}
+
     def delete(self,paths):
         url = "http://pcs.baidu.com/rest/2.0/pcs/file"
         querystring = {"app_id":self.app_id,"method":"delete"}
@@ -74,8 +75,8 @@ class PCS():
         except Exception as e:
             logger.info(e)
             return '[]' 
-
         return response.text
+    
     def getHeader(self):
         return self.header
 
@@ -96,7 +97,18 @@ class PCS():
         response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
 
     def upload(self,dirname,tmp_file,base_name):
-#         foo = self.disk.upload(os.path.dirname(path),tmp_file,os.path.basename(path))
         logger.info("upload")
+
     def getRestUrl(self,url):
         return "https://pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id="+self.app_id+"&path="+url
+
+    def mkdir(self,path):
+        url = "http://pcs.baidu.com/rest/2.0/pcs/file"
+        querystring = {"app_id":self.app_id,"method":"mkdir","path":path}
+        headers = {
+            'host': "pcs.baidu.com",
+            'User-Agent':self.user_agent,
+            'cookie': "BDUSS="+self.BDUSS
+            }
+        response = requests.request("POST", url,  headers=headers, params=querystring)
+        print(response.text)

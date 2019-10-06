@@ -30,7 +30,7 @@ from core.task  import Task
 dirReaderDaemon = Pool(1)
 pool = Pool(5)
 
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 class NoSuchRowException(Exception):
     pass
@@ -145,23 +145,23 @@ class CloudFS(Operations):
                 continue
             files.append(file['server_filename'])
             abs_files.append(file['path'])
-            logger.debug(file['path'])
+#             logger.debug(file['path'])
  
         file_num = len(abs_files)
         group = int(math.ceil(file_num / 100.0))
-        logger.debug(f"group: {group}")
-        logger.debug(f"abs_files: {abs_files}")
+#         logger.debug(f"group: {group}")
+#         logger.debug(f"abs_files: {abs_files}")
         for i in range(group):
             obj = [f for n,f in enumerate(abs_files) if n % group == i] #一组数据
             while 1:
                 try:
                     ret = json.loads(self.disk.meta(obj))
-                    logger.debug(f'{ret}')
+#                     logger.debug(f'{ret}')
                     break
                 except:
                     logger.info('error')
             for file_info in ret['info']:
-                logger.debug(file_info)
+#                 logger.debug(file_info)
                 self._add_file_to_buffer(file_info['path'],file_info)
                 if depth >0:
                     depth-=1
@@ -174,6 +174,7 @@ class CloudFS(Operations):
 
     
     
+    @funcLog
     def readdir(self, path, offset):
 #         if path not in self.traversed_folder:
         self.traversed_folder[path] = True
@@ -251,7 +252,6 @@ class CloudFS(Operations):
                 old_info = self.buffer.pop(old)
                 self.buffer[new] = old_info
 
-    @funcLog
     def unlink(self, path):
         self.disk.delete([path])
         self.updateCahe(path,None)
@@ -260,27 +260,38 @@ class CloudFS(Operations):
     def access(self, path, amode):
         return 0
 
-    @funcLog
     def rmdir(self, path):
         self.disk.delete([path])
         self.updateCahe(path,None)
 
-    @funcLog
     def rename(self, old, new):
         self.disk.rename(old,new)
         self.updateCahe(old,new)
-    
+
+    @funcLog
+    def mkdir(self, path, mode):
+        directory = path[:path.rfind("/")]
+        filename  = path[path.rfind("/")+1:]
+        
+        cache = self.dir_buffer[directory]
+        cache.append(filename)
+        self.dir_buffer[directory]=cache
+        self.disk.mkdir(path)
+
+#         raise FuseOSError(errno.EROFS)
+
     @funcLog
     def create(self, path, mode, fi=None):
+        pass
 
-        '''
-        When raw_fi is False (default case), fi is None and create should
-        return a numerical file handle.
+#         '''
+#         When raw_fi is False (default case), fi is None and create should
+#         return a numerical file handle.
 
-        When raw_fi is True the file handle should be set directly by create
-        and return 0.
-        '''
-        return 999999
+#         When raw_fi is True the file handle should be set directly by create
+#         and return 0.
+#         '''
+#         return 0
 
 #     statfs = None
 
