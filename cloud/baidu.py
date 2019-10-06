@@ -31,6 +31,7 @@ class PCS():
         formatPaths = json.dumps(list(map(lambda p : {"path":p}, paths)))
         payload = "--a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942\nContent-Disposition: form-data; name=\"param\"\n\n{\"list\":"+formatPaths+"}\n--a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942--\n"
 
+        payload = payload.encode('utf-8')
         headers = {
             'host': "pcs.baidu.com",
             'User-Agent':self.user_agent,
@@ -84,6 +85,7 @@ class PCS():
         querystring = {"app_id":self.app_id,"method":"move"}
         formatPaths = '[{"from":"'+old+'","to":"'+new+'"}]'
         payload = "--a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942\nContent-Disposition: form-data; name=\"param\"\n\n{\"list\":"+formatPaths+"}\n--a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942--\n"
+        payload = payload.encode('utf-8')
 
         headers = {
             'host': "pcs.baidu.com",
