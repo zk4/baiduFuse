@@ -95,7 +95,7 @@ class Task(object):
                                 self.cache[i]["m"].wait(1)
 
                     if alldone:
-                        logger.info(f'range - {r}')
+#                         logger.info(f'range - {r}')
                         return self.m[offset:offset+size]
 
 

@@ -139,7 +139,7 @@ class CloudFS(Operations):
         if 'errno' in foo:
             logger.error("maybe token is not right, try re login http://pan.baidu.com in Chrome")
         if "list" not in foo:
-            logger.info("no list")
+#             logger.info("no list")
             return 
 
 
