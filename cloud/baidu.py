@@ -39,7 +39,7 @@ class PCS():
         }
         response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
 
-        print(response.text)
+
     def list_files(self,path):
         url = "http://pcs.baidu.com/rest/2.0/pcs/file"
         querystring = {"app_id":self.app_id,"by":"name","limit":"0-2147483647","method":"list","order":"asc","path":path}
@@ -78,8 +78,20 @@ class PCS():
     def getHeader(self):
         return self.header
 
-    def rename(self,args):
+    def rename(self, old, new):
         logger.info("rename")
+        url = "http://pcs.baidu.com/rest/2.0/pcs/file"
+        querystring = {"app_id":self.app_id,"method":"move"}
+        formatPaths = '[{"from":"'+old+'","to":"'+new+'"}]'
+        payload = "--a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942\nContent-Disposition: form-data; name=\"param\"\n\n{\"list\":"+formatPaths+"}\n--a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942--\n"
+
+        headers = {
+            'host': "pcs.baidu.com",
+            'User-Agent':self.user_agent,
+            'Content-Type': "multipart/form-data; boundary=a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942",
+            'cookie': "BDUSS="+self.BDUSS
+        }
+        response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
 
     def upload(self,dirname,tmp_file,base_name):
 #         foo = self.disk.upload(os.path.dirname(path),tmp_file,os.path.basename(path))
