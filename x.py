@@ -70,7 +70,7 @@ class CloudFS(Operations):
     '''Baidu netdisk filesystem'''
 
     def __init__(self,  *args, **kw):
-        self.buffer = Cache('./cache/buffer')
+        self.buffer = Cache('./cache/buffer23')
         self.dir_buffer = Cache('./cache/dir_buffer')
 
         self.traversed_folder = {}
@@ -98,7 +98,8 @@ class CloudFS(Operations):
 
 
     def getattr(self, path, fh=None):
-        
+        if path in self.writing_files:
+            return self.writing_files[path]["attr"]
         if path.split("/")[-1].startswith("."):
             raise FuseOSError(errno.ENOENT)
             
@@ -187,6 +188,8 @@ class CloudFS(Operations):
     
     @funcLog
     def open(self, path, flags):
+        if path  in self.writing_files:
+          return 0
         # method does not have thread race problem, open by one thread only
         try:
             if path not in self.downloading_files:
@@ -207,15 +210,7 @@ class CloudFS(Operations):
             logger.exception(e)
         return 0
 
-    def release(self, path, fh):
-        # method does not have thread race problem, release by one thread only
-        if path in self.downloading_files:
-#             self.downloading_files[path].terminate()
-#             del self.downloading_files[path]
-#             tmp = "./tmp"+path
-#             logger.info("delete tmp:", tmp)
-#             os.remove(tmp)
-            pass
+
 
 
     def read(self, path, size, offset, fh):
@@ -277,38 +272,38 @@ class CloudFS(Operations):
 
     @funcLog
     def create(self, path, mode,fh=None):
-        foo = File()
-        foo['st_ctime'] = int(time.time())
-        foo['st_mtime'] = int(time.time())
-        foo['st_mode'] = (stat.S_IFREG | 0x777)
-        foo['st_nlink'] = 1
-        foo['st_size'] = 10000
-        self.buffer[path] = foo
-#         tmp_file = tempfile.TemporaryFile('r+w+b')
-        filename  = path[path.rfind("/")+1:]
-        self.disk.upload("/Users/zk/Downloads/"+filename,path)
-#         full_path = self._full_path(path)
-#         return os.open(full_path, os.O_WRONLY | os.O_CREAT, mode)
-#         jdata = json.loads(self.disk.meta([path]))
-
-#         if 'info' not in jdata:
-#             raise FuseOSError(errno.ENOENT)
-#         if jdata['errno'] != 0:
-#             raise FuseOSError(errno.ENOENT)
-
-#         file_info = jdata['info'][0]
-#         self._add_file_to_buffer(path,file_info)
+        # if path not in self.writing_files:
+        self.writing_files[path] = {
+        
+        'attr':
+            {'st_atime': 1570449275.0, 'st_ctime': 1570449275.0, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': 1570449275.0, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502}
+        }
         return 0
 
-#     @funcLog
-    def write(self, path, data, offset, fp):
-        print("write---",len(data))
-#         self.disk.upload(path,"/test/abcdefg")
+    def flush(self, path, fh):
+        return 0
 
-#         return len(data)
+    def release(self, path, fh):
+        # method does not have thread race problem, release by one thread only
+        if path in self.downloading_files:
+#             self.downloading_files[path].terminate()
+#             del self.downloading_files[path]
+#             tmp = "./tmp"+path
+#             logger.info("delete tmp:", tmp)
+#             os.remove(tmp)
+            pass
+    def write(self, path, data, offset, fp):
+        # TODO 回调 request 的 progress
+        print(offset)
+        self.writing_files[path]["attr"]["st_size"] += len(data)
+        return len(data)
+
+
+    def chmod(self, path, mode):
+        pass
 
     def statfs(self, path):
         return {'f_bavail': 1609287, 'f_bfree': 1673287, 'f_blocks': 60989440, 'f_bsize': 1048576, 'f_favail': 4290675908, 'f_ffree': 4290675908, 'f_files': 4294967279, 'f_flag': 0, 'f_frsize': 4096, 'f_namemax': 255}
 if __name__ == '__main__':
     logger.info(colored("- fuse 4 cloud driver -", 'red'))
-    FUSE(CloudFS(),sys.argv[1],foreground=True,nonempty=False,async_read=True)
+    FUSE(CloudFS(),sys.argv[1],foreground=True,nonempty=False,async_read=True,raw_fi=True)

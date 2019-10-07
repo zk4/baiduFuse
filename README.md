@@ -47,7 +47,11 @@ mpv    --cache=no ftp://192.168.1.15:2121/锦绣良缘粤语Gotv/锦绣良缘19.
 
 ## write file (beta)
 Write file is a bit trick.  fuse will call statfs/create/write/read .I need a workaround for this.
-
+-  create 
+-  getattr 
+-  write 
+-  flush 
+-  release
 ## reference 
 just for myself reference
 - [intro](https://www.stavros.io/posts/python-fuse-filesystem/)
