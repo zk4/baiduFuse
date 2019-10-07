@@ -6,6 +6,7 @@ from log import logger,funcLog
 import requests
 import json
 from core.autoBDUSS import getBDUSS,cj
+from core.progress_requests import BufferReader, progress
  
 
 
@@ -95,15 +96,21 @@ class PCS():
     def upload(self,localPath,cloudPath):
         url = "http://pcs.baidu.com/rest/2.0/pcs/file"
         querystring = {"app_id":self.app_id,"method":"upload","type":"tmpfile"}
+        files = {"myFileUpl": ("name", open(localPath, 'rb').read())}
+
+        (data, ctype) = requests.packages.urllib3.filepost.encode_multipart_formdata(files)
+        body = BufferReader(data, progress)
+
         headers = {
             'host': "pcs.baidu.com",
             'User-Agent':self.user_agent,
-            'cookie': "BDUSS="+self.BDUSS
+            'cookie': "BDUSS="+self.BDUSS,
+            'Content-Type':ctype
             }
-        with open(localPath,"rb") as f:
-            response = requests.request("POST", url,files={localPath:f} , headers=headers, params=querystring)
-            md5 =  json.loads(response.text)["md5"]
-            return self.createSuperFile([md5],cloudPath)
+
+        response = requests.request("POST", url,data=body , headers=headers, params=querystring)
+        md5 =  json.loads(response.text)["md5"]
+        return self.createSuperFile([md5],cloudPath)
 
 
     def createSuperFile(self,blocklist,path):
