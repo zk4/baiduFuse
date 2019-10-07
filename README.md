@@ -29,9 +29,10 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
 - [ ] improvment: when close local application, too slow.
 - [ ] improvment: reduce local disk size,( evict, download in memory)
 - [x] feature: support write to cloud ( on `write` branch)
+  - [ ] improvment: when uploading, file flicks in finder on mac 
   - [ ] bug: upload file not update cache 
   - [x] bug: upload file not openable in current session
-  - [ ] bug: mutliupoad results a lot of dot copy file
+  - [ ] bug: mutli files upload results a lot of dotted copy file on mac
   - [ ] improvment: mac uploading icon not rotating
 
 
@@ -50,15 +51,20 @@ mpv    --cache=no ftp://192.168.1.15:2121/锦绣良缘粤语Gotv/锦绣良缘19.
 
 
 ## write file (beta)
-Write file is a bit trick.  fuse will call statfs/create/write/read .I need a workaround for this.
--  create 
+Write file is a little bit tricky. you can`t get source file name, but only source bytes
+-  statfs 
+   to confirm disk free size is avaiable 
+-  create  
+   normally create a file with open function, differs from open api in fuse interface which opens an existing file  
 -  getattr 
+   mainly check permission, and other file info 
 -  write 
+   will be called multipal times, write source bytes to remote 
 -  flush 
+   will be called once
 -  release
+   will be called once
 
-single file write is ok now.
-multi file write function need to be refined .
 
 ## reference 
 just for myself reference
