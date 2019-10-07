@@ -70,7 +70,7 @@ class CloudFS(Operations):
     '''Baidu netdisk filesystem'''
 
     def __init__(self,  *args, **kw):
-        self.buffer = Cache('./cache/buffer23')
+        self.buffer = {} # Cache('./cache/buffer23')
         self.dir_buffer = Cache('./cache/dir_buffer')
 
         self.traversed_folder = {}
@@ -283,7 +283,11 @@ class CloudFS(Operations):
     def flush(self, path, fh):
         return 0
 
+    @funcLog
     def release(self, path, fh):
+        if path in self.writing_files:
+            del self.writing_files[path]
+            return 
         # method does not have thread race problem, release by one thread only
         if path in self.downloading_files:
 #             self.downloading_files[path].terminate()
