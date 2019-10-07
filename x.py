@@ -299,10 +299,12 @@ class CloudFS(Operations):
                 uploading_tmp=self.writing_files[path]['uploading_tmp']
                 self.disk.upload(uploading_tmp.name,path)
                 self.writing_files[path]['uploading_tmp'].close()
+
                 del self.writing_files[path]
-                
+
                 # why ? prevent accidently read file when uploading still in progress
                 del self.downloading_files[path]
+                
                 print("released",path)
                 return  
         # method does not have thread race problem, release by one thread only
@@ -327,7 +329,10 @@ class CloudFS(Operations):
         pass
 
     def statfs(self, path):
-        return {'f_bavail': 1609287, 'f_bfree': 1673287, 'f_blocks': 60989440, 'f_bsize': 1048576, 'f_favail': 4290675908, 'f_ffree': 4290675908, 'f_files': 4294967279, 'f_flag': 0, 'f_frsize': 4096, 'f_namemax': 255}
+        return {'f_bavail': int(85533433401/4096), 'f_bfree': int(85533433401/4096),  # 相同的值  block
+                'f_favail': 4290675908, 'f_ffree': 4290675908,  # 相同的值  node
+                'f_bsize': 104857,  # perferd value 
+        'f_blocks': int(5611374772224/8),  'f_files': 4294967279, 'f_flag': 0, 'f_frsize': 4096, 'f_namemax': 255}
 if __name__ == '__main__':
     logger.info(colored("- fuse 4 cloud driver -", 'red'))
     FUSE(CloudFS(),sys.argv[1],foreground=True,nonempty=False,async_read=True,raw_fi=True)

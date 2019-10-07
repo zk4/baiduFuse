@@ -19,6 +19,7 @@ class PCS():
     def __init__(self,*args, **kw):
         self.app_id="266719"
         self.user_agent="netdisk;8.3.1;android-android"
+        self.host = "pcs.baidu.com"
         self.BDUSS = getBDUSS()
         self.header={'User-Agent': self.user_agent,'cookie':"BDUSS="+   self.BDUSS}
 
@@ -143,3 +144,16 @@ class PCS():
             }
         response = requests.request("POST", url,  headers=headers, params=querystring)
         print(response.text)
+
+    def quota(self):
+        url = "http://pcs.baidu.com/rest/2.0/pcs/quota"
+        querystring = {"app_id":self.app_id,"method":"info"}
+        headers = {
+            'Host': self.host,
+            'User-Agent': self.user_agent,
+            'Cookie': "BDUSS="+self.BDUSS,
+            'cache-control': "no-cache"
+            }
+
+        response = requests.request("GET", url, headers=headers, params=querystring)
+        print(response.text)        

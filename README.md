@@ -26,14 +26,13 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
     ```
 
 ## todo 
-- [ ] improvment: when close local application, too slow.
 - [ ] improvment: reduce local disk size,( evict, download in memory)
 - [x] feature: support write to cloud ( on `write` branch)
-  - [ ] improvment: when uploading, file flicks in finder on mac 
+  - [x] improvment: when uploading, file flicks in finder on mac : you can think flick as uploading :)
   - [ ] bug: upload file not update cache 
   - [x] bug: upload file not openable in current session
     - [ ] why open the file so fast after uploading an file?
-  - [ ] bug: mutli files upload results a lot of dotted copy file on mac
+  - [x] bug: mutli files upload results a lot of dotted copy file on mac: this is becaouse of finder create that file 
   - [x] improvment: mac uploading icon not rotating
   - [x] improvment: upload file in other thread:  no need 
 - [ ] bug: display true disk meta data
