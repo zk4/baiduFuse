@@ -103,7 +103,7 @@ class CloudFS(Operations):
 
     def getattr(self, path, fh=None):
         if path in self.writing_files:
-            return self.writing_files[path]["attr"]
+            return self.writing_files[path]
         if path.split("/")[-1].startswith("."):
             raise FuseOSError(errno.ENOENT)
             
@@ -173,7 +173,7 @@ class CloudFS(Operations):
         self.dir_buffer[path]=files
 
 
-    
+      
     
 #     @funcLog
     def readdir(self, path, offset):
@@ -192,6 +192,7 @@ class CloudFS(Operations):
     
     @funcLog
     def open(self, path, flags):
+        print("open writing_files",self.writing_files)
         if path  in self.writing_files:
           return 0
         # method does not have thread race problem, open by one thread only
@@ -278,27 +279,27 @@ class CloudFS(Operations):
     def create(self, path, mode,fh=None):
         with self.createLock:
             if path not in self.writing_files:
-                print("create uplading..",path)
+               
                 self.writing_files[path] = {
-                'tmp':tempfile.NamedTemporaryFile('wb'),
-                'attr':
-                    {'st_atime': 1570449275.0, 'st_ctime': 1570449275.0, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': 1570449275.0, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502}
+                'st_atime': 1570449275.0, 'st_ctime': 1570449275.0, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': 1570449275.0, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502,
+                'uploading_tmp':tempfile.NamedTemporaryFile('wb')
+                     
                 }  
         return 0
 
     def flush(self, path, fh):
         with self.createLock:
             if path in self.writing_files:
-                self.writing_files[path]["tmp"].flush()
+                self.writing_files[path]["uploading_tmp"].flush()
         return 0
 
    
     def release(self, path, fh):
         with self.createLock:
             if path in self.writing_files:
-                tmp=self.writing_files[path]['tmp']
-                self.disk.upload(tmp.name,path)
-                self.writing_files[path]['tmp'].close()
+                uploading_tmp=self.writing_files[path]['uploading_tmp']
+                self.disk.upload(uploading_tmp.name,path)
+                self.writing_files[path]['uploading_tmp'].close()
                 del self.writing_files[path]
                 print("released",path)
                 return  
@@ -306,17 +307,17 @@ class CloudFS(Operations):
         if path in self.downloading_files:
 #             self.downloading_files[path].terminate()
 #             del self.downloading_files[path]
-#             tmp = "./tmp"+path
-#             logger.info("delete tmp:", tmp)
-#             os.remove(tmp)
+#             uploading_tmp = "./uploading_tmp"+path
+#             logger.info("delete uploading_tmp:", uploading_tmp)
+#             os.remove(uploading_tmp)
             pass
     def write(self, path, data, offset, fp):
         # TODO 回调 request 的 progress
     
         length = len(data)
-        self.writing_files[path]["attr"]["st_size"] += length
-        self.writing_files[path]["tmp"].write(data)
-        print("write",length,path)
+        self.writing_files[path]["st_size"] += length
+        self.writing_files[path]["uploading_tmp"].write(data)
+       
         return length
 
 
