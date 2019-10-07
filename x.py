@@ -192,9 +192,8 @@ class CloudFS(Operations):
     
     @funcLog
     def open(self, path, flags):
-        print("open writing_files",self.writing_files)
         if path  in self.writing_files:
-          return 0
+            return 0
         # method does not have thread race problem, open by one thread only
         try:
             if path not in self.downloading_files:
@@ -279,7 +278,6 @@ class CloudFS(Operations):
     def create(self, path, mode,fh=None):
         with self.createLock:
             if path not in self.writing_files:
-               
                 self.writing_files[path] = {
                 'st_atime': 1570449275.0, 'st_ctime': 1570449275.0, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': 1570449275.0, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502,
                 'uploading_tmp':tempfile.NamedTemporaryFile('wb')
@@ -299,8 +297,12 @@ class CloudFS(Operations):
             if path in self.writing_files:
                 uploading_tmp=self.writing_files[path]['uploading_tmp']
                 self.disk.upload(uploading_tmp.name,path)
+
                 self.writing_files[path]['uploading_tmp'].close()
                 del self.writing_files[path]
+                
+                # why ? prevent accidently read file when uploading still in progress
+                del self.downloading_files[path]
                 print("released",path)
                 return  
         # method does not have thread race problem, release by one thread only
