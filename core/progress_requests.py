@@ -1,4 +1,5 @@
 import io
+
 class CancelledError(Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -40,5 +41,5 @@ class BufferReader(io.BytesIO):
 
 
 def progress(size=None, progress=None):
-    pass
-    # print("{0} / {1}".format(size, progress))
+    print("{0} / {1}".format(size, progress))
+
