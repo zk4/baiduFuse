@@ -21,6 +21,7 @@ from fuse import FUSE, FuseOSError, Operations
 from termcolor import colored
 from colorama import Fore, Back, Style, init
 from concurrent.futures  import ThreadPoolExecutor as Pool
+from threading import Lock
 
 
 from log import funcLog,logger
@@ -76,8 +77,11 @@ class CloudFS(Operations):
         self.traversed_folder = {}
         self.disk = PCS()
 
+        self.createLock = Lock()
+
         self.writing_files={}
         self.downloading_files = {}
+
         # update all folder  inother thread
         dirReaderDaemon.submit(self.readdirAsync,"/",100,dirReaderDaemon)  
 
@@ -270,28 +274,34 @@ class CloudFS(Operations):
         self.dir_buffer[directory]=cache
         self.disk.mkdir(path)
 
-    @funcLog
+ 
     def create(self, path, mode,fh=None):
-        if path not in self.writing_files:
-            self.writing_files[path] = {
-            'tmp':tempfile.NamedTemporaryFile('wb'),
-            'attr':
-                {'st_atime': 1570449275.0, 'st_ctime': 1570449275.0, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': 1570449275.0, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502}
-            }
+        with self.createLock:
+            if path not in self.writing_files:
+                print("create uplading..",path)
+                self.writing_files[path] = {
+                'tmp':tempfile.NamedTemporaryFile('wb'),
+                'attr':
+                    {'st_atime': 1570449275.0, 'st_ctime': 1570449275.0, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': 1570449275.0, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502}
+                }  
         return 0
 
     def flush(self, path, fh):
+        with self.createLock:
+            if path in self.writing_files:
+                self.writing_files[path]["tmp"].flush()
         return 0
 
-    @funcLog
+   
     def release(self, path, fh):
-        if path in self.writing_files:
-            tmp=self.writing_files[path]['tmp']
-            self.disk.upload(tmp.name,path)
-            self.writing_files[path]['tmp'].close()
-
-            del self.writing_files[path]
-            return 
+        with self.createLock:
+            if path in self.writing_files:
+                tmp=self.writing_files[path]['tmp']
+                self.disk.upload(tmp.name,path)
+                self.writing_files[path]['tmp'].close()
+                del self.writing_files[path]
+                print("released",path)
+                return  
         # method does not have thread race problem, release by one thread only
         if path in self.downloading_files:
 #             self.downloading_files[path].terminate()
@@ -302,10 +312,12 @@ class CloudFS(Operations):
             pass
     def write(self, path, data, offset, fp):
         # TODO 回调 request 的 progress
-
-        self.writing_files[path]["attr"]["st_size"] += len(data)
+    
+        length = len(data)
+        self.writing_files[path]["attr"]["st_size"] += length
         self.writing_files[path]["tmp"].write(data)
-        return len(data)
+        print("write",length,path)
+        return length
 
 
     def chmod(self, path, mode):
