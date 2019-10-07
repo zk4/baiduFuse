@@ -52,6 +52,10 @@ Write file is a bit trick.  fuse will call statfs/create/write/read .I need a wo
 -  write 
 -  flush 
 -  release
+
+single file write is ok now.
+multi file write function need to be refined .
+
 ## reference 
 just for myself reference
 - [intro](https://www.stavros.io/posts/python-fuse-filesystem/)

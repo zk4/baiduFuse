@@ -272,12 +272,12 @@ class CloudFS(Operations):
 
     @funcLog
     def create(self, path, mode,fh=None):
-        # if path not in self.writing_files:
-        self.writing_files[path] = {
-        'tmp':tempfile.NamedTemporaryFile('wb'),
-        'attr':
-            {'st_atime': 1570449275.0, 'st_ctime': 1570449275.0, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': 1570449275.0, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502}
-        }
+        if path not in self.writing_files:
+            self.writing_files[path] = {
+            'tmp':tempfile.NamedTemporaryFile('wb'),
+            'attr':
+                {'st_atime': 1570449275.0, 'st_ctime': 1570449275.0, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': 1570449275.0, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502}
+            }
         return 0
 
     def flush(self, path, fh):
