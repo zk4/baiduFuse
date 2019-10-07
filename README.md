@@ -26,13 +26,13 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
     ```
 
 ## todo 
-- [ ] when close local application, too slow.
-- [ ] reduce local disk size,( evict, download in memory)
-- [x] support write to cloud ( on `write` branch)
-  - [ ] upload file not update cache 
-  - [x] upload file not openable in current session
-  - [ ] mutliupoad results a lot of dot copy file
-  - [ ] mac uploading icon not rotating
+- [ ] improvment: when close local application, too slow.
+- [ ] improvment: reduce local disk size,( evict, download in memory)
+- [x] feature: support write to cloud ( on `write` branch)
+  - [ ] bug: upload file not update cache 
+  - [x] bug: upload file not openable in current session
+  - [ ] bug: mutliupoad results a lot of dot copy file
+  - [ ] improvment: mac uploading icon not rotating
 
 
 ## tips
