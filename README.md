@@ -1,8 +1,8 @@
 
 ## feature 
-- support any local application!  use cloud driver as local driver.
-- read dir in async mode. (You may see empty dir,but with actual fiels on cloud, that is because some file manager cache dir structure(rancher) when dir data is still on the way back from cloud, you need to get around this by yourself.the best solution is: Do not use ranger,use fff nnn)
-- net scheduler is optimized for local read
+- Support any local application!  use cloud driver as local driver.
+- Read dir in async mode. (You may see empty dir,but with actual fiels on cloud, that is because some file manager cache dir structure(rancher) when dir data is still on the way back from cloud, you need to get around this by yourself.the best solution is: Do not use ranger,use fff nnn)
+- Net scheduler is optimized for local read
 
 
 
@@ -11,8 +11,8 @@
 
 ## cloud driver support
 - [x] 百度盘 
- - support read , delete, mv(rename) , highly optimized for media stream.
- - auto fetch credential from Chrome browser
+ - Support all disk manipulating with baidu cloud,including read,delete,mkdir,cp,mv,etc, highly optimized for reading. Try opening any file , even a big file. You shall see the magic.
+ - Auto fetch credential from Chrome browser
 
 Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull request.
 ## usage 
@@ -27,16 +27,11 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
 
 ## todo 
 - [ ] improvment: reduce local disk size,( evict, download in memory)
-- [x] feature: support write to cloud ( on `write` branch)
-  - [x] improvment: when uploading, file flicks in finder on mac : you can think flick as uploading :)
-  - [ ] bug: upload file not update cache 
-  - [x] bug: upload file not openable in current session
-    - [ ] why open the file so fast after uploading an file?
-  - [x] bug: mutli files upload results a lot of dotted copy file on mac: this is becaouse of finder create that file 
-  - [x] improvment: mac uploading icon not rotating
-  - [x] improvment: upload file in other thread:  no need 
+- [ ] bug: upload file not update cache 
+- [ ] why open the file so fast after uploading an file?
 - [ ] improvment: display true disk meta data
-  
+- [ ] encrpyt on the fly! 
+   this would be an exciting feature,you file would be 100%p safe on any cloud. I will try to use the common encrty method to encrpt the file. so you can Mannuly donwload your file from  cloud, and decrypt it without baiduFuse.
 
 
 
