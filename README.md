@@ -32,9 +32,11 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
   - [ ] improvment: when uploading, file flicks in finder on mac 
   - [ ] bug: upload file not update cache 
   - [x] bug: upload file not openable in current session
-    - [ ] why open file so fast ?
+    - [ ] why open the file so fast after uploading an file?
   - [ ] bug: mutli files upload results a lot of dotted copy file on mac
   - [ ] improvment: mac uploading icon not rotating
+  - [ ] improvment: upload file in other thread 
+  - [ ] 
 
 
 
