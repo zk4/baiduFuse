@@ -274,7 +274,7 @@ class CloudFS(Operations):
     def create(self, path, mode,fh=None):
         # if path not in self.writing_files:
         self.writing_files[path] = {
-        
+        'tmp':tempfile.NamedTemporaryFile('wb'),
         'attr':
             {'st_atime': 1570449275.0, 'st_ctime': 1570449275.0, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': 1570449275.0, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502}
         }
@@ -286,6 +286,10 @@ class CloudFS(Operations):
     @funcLog
     def release(self, path, fh):
         if path in self.writing_files:
+            tmp=self.writing_files[path]['tmp']
+            self.disk.upload(tmp.name,path)
+            self.writing_files[path]['tmp'].close()
+
             del self.writing_files[path]
             return 
         # method does not have thread race problem, release by one thread only
@@ -298,8 +302,9 @@ class CloudFS(Operations):
             pass
     def write(self, path, data, offset, fp):
         # TODO 回调 request 的 progress
-        print(offset)
+
         self.writing_files[path]["attr"]["st_size"] += len(data)
+        self.writing_files[path]["tmp"].write(data)
         return len(data)
 
 
