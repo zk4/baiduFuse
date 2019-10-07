@@ -5,8 +5,9 @@ import logging
 from log import logger,funcLog
 import requests
 import json
-import browser_cookie3
-cj = browser_cookie3.chrome(domain_name='baidu.com')
+from core.autoBDUSS import getBDUSS,cj
+ 
+
 
 session = requests.Session()
 a = requests.adapters.HTTPAdapter(max_retries=3,pool_connections = 50, pool_maxsize = 200)
@@ -17,15 +18,7 @@ class PCS():
     def __init__(self,*args, **kw):
         self.app_id="266719"
         self.user_agent="netdisk;8.3.1;android-android"
-        self.BDUSS = None
-        for cookie in cj:
-           if cookie.name =='BDUSS':
-               self.BDUSS=cookie.value
-        if not self.BDUSS:
-            print("no bdus")
-            sys.exit()
-        else:
-            print(self.BDUSS)
+        self.BDUSS = getBDUSS()
         self.header={'User-Agent': self.user_agent,'cookie':"BDUSS="+   self.BDUSS}
 
     def delete(self,paths):
