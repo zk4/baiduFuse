@@ -277,12 +277,11 @@ class CloudFS(Operations):
 
  
     def create(self, path, mode,fh=None):
-        if path.startswith(".") or path.startswith("_"):
-            return 0
         with self.createLock:
             if path not in self.writing_files:
+                t = time.time()
                 self.writing_files[path] = {
-                'st_atime': 1570449275.0, 'st_ctime': 1570449275.0, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': 1570449275.0, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502,
+                'st_atime': t, 'st_ctime': t, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': t, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502,
                 'uploading_tmp':tempfile.NamedTemporaryFile('wb')
                 }  
         return 0
