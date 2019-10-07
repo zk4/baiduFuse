@@ -34,9 +34,10 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
   - [x] bug: upload file not openable in current session
     - [ ] why open the file so fast after uploading an file?
   - [ ] bug: mutli files upload results a lot of dotted copy file on mac
-  - [ ] improvment: mac uploading icon not rotating
-  - [ ] improvment: upload file in other thread 
-  - [ ] 
+  - [x] improvment: mac uploading icon not rotating
+  - [x] improvment: upload file in other thread:  no need 
+- [ ] bug: display true disk meta data
+  
 
 
 
