@@ -35,7 +35,7 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
   - [x] bug: mutli files upload results a lot of dotted copy file on mac: this is becaouse of finder create that file 
   - [x] improvment: mac uploading icon not rotating
   - [x] improvment: upload file in other thread:  no need 
-- [ ] bug: display true disk meta data
+- [ ] improvment: display true disk meta data
   
 
 
@@ -55,7 +55,7 @@ mpv    --cache=no ftp://192.168.1.15:2121/锦绣良缘粤语Gotv/锦绣良缘19.
 
 
 ## write file (beta)
-Write file is a little bit tricky. you can`t get source file name, but only source bytes
+Write file is a little bit tricky to implement in fuse. you can`t get source file name in fuse, but only source bytes. so a temp file is needed to be an mediator.
 -  statfs 
    to confirm disk free size is avaiable 
 -  create  
