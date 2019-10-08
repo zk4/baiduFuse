@@ -6,6 +6,7 @@
 
 
 
+
 ![demo](https://github.com/zk4/baiduFuse/blob/master/img/d.gif)
 
 
@@ -26,15 +27,15 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
     ```
 
 ## todo 
-- [ ] improvment: reduce local disk size,( evict, download in memory)
+- [ ] improvment!!: reduce local disk size,( evict, download in memory)
 - [ ] bug: upload file not update cache 
 - [ ] why open the file so fast after uploading an file?
 - [ ] improvment: display true disk meta data
 - [ ] encrpyt on the fly! 
    this would be an exciting feature,you file would be 100%p safe on any cloud. I will try to use the common encrty method to encrpt the file. so you can Mannuly donwload your file from  cloud, and decrypt it without baiduFuse.
-
-
-
+- [ ] No response reading from net will drop the read operation. This should be configurable, now it is fixed value 10 seconds.
+- [ ] 百度 8 秒与本地应用兼容问题,本地 size 与 网络头 size 不一致.
+- [ ] 将 cache 加上超时
 ## tips
 ### mpv (ftp on fuse)
 https://github.com/mpv-player/mpv/issues/5449

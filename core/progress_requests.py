@@ -1,15 +1,5 @@
 import io
-
-class CancelledError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-        Exception.__init__(self, msg)
-
-    def __str__(self):
-        return self.msg
-
-    __repr__ = __str__
-
+from core.custom_exceptions import * 
 class BufferReader(io.BytesIO):
     def __init__(self, buf=b'',
                  callback=None,

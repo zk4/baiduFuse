@@ -12,6 +12,7 @@ import mmap
 import logging
 from log import logger,funcLog
 from core.scheduler import handle,q,session
+from core.custom_exceptions import Baidu8Secs
 
 logger.setLevel(logging.DEBUG)
 
@@ -74,6 +75,7 @@ class Task(object):
         try:
             r = self.get_block_range(offset,size)
             c = self.cache[r[0]]
+            start = time.time()
 
             maxWaitRound = 10
             curRound = 0
@@ -101,13 +103,17 @@ class Task(object):
 
                 
                 q.put((Task.createHelperThread,[r[0],r[1],self],1))
+                end = time.time()
+                # no response for 10 secs, just drop it 
+                if end-start>10:
+                    return None
                 curRound+=1
 #                 logger.debug(f"wait for {curRound}")
 #                 with self.condition:
 #                     self.condition.wait(1)
 
         except Exception as e:
-            logger.debug(f'{r[0]},len(self.cache)')
+            logger.debug(f'{r[0]},{len(self.cache)},{self.saved_path}')
             logger.exception(e) 
 
 
@@ -124,13 +130,13 @@ class Task(object):
 
         try: 
             self.file_size = int(r.headers["content-length"]) 
+            if 'Location' in r.headers and 'issuecdn' in r.headers['Location']:
+                raise Baidu8Secs(self.saved_path)
         except Exception as e : 
-            logger.info(e)
-            return    
-
+            raise e 
+                
         self.part_count = math.ceil(self.file_size / self.part_size)
 
-            
         with open(self.saved_path, "wb")  as fp:
             fp.seek(self.file_size)
             fp.write(b'\0')
@@ -143,6 +149,7 @@ class Task(object):
 #             q.put((createHelperThread,[self.part_count-3 if ( self.part_count-3 ) > 0   else self.part_count-1 ,self.part_count-1,self],1))
         else:
             q.put((Task.createHelperThread,[0,400 if 400 < self.part_count else self.part_count-1 ,self],1))
+      
 
     def create_range(self):
         start = 0

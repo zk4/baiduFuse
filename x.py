@@ -27,6 +27,7 @@ from threading import Lock
 from log import funcLog,logger
 from cloud.baidu import PCS 
 from core.task  import Task
+from core.custom_exceptions import *
 
 
 dirReaderDaemon = Pool(1)
@@ -72,7 +73,7 @@ class CloudFS(Operations):
     '''Baidu netdisk filesystem'''
 
     def __init__(self,  *args, **kw):
-        self.buffer = Cache('./cache/buffer2389777')
+        self.buffer = Cache('./cache/buffer')
         self.dir_buffer = Cache('./cache/dir_buffer')
 
         self.traversed_folder = {}
@@ -83,7 +84,7 @@ class CloudFS(Operations):
         self.writing_files={}
         self.downloading_files = {}
 
-        # update all folder  inother thread
+        # update all folder  in other thread
         dirReaderDaemon.submit(self.readdirAsync,"/",100,dirReaderDaemon)  
 
 
@@ -183,6 +184,7 @@ class CloudFS(Operations):
         pool.submit(self.readdirAsync,path,2,pool)  
         if path  in self.dir_buffer:
 #             logger.info(f'{path},{self.dir_buffer[path]}')
+            print("hit dir cache",path)
             for r in self.dir_buffer[path]:
                 yield r
         else:
@@ -191,7 +193,7 @@ class CloudFS(Operations):
                 yield r
 
     
-    @funcLog
+    # @funcLog
     def open(self, path, flags):
         if path  in self.writing_files:
             return 0
@@ -211,6 +213,8 @@ class CloudFS(Operations):
                 x= Task(url,tmp,self.disk.getHeader())
                 x.start()
                 self.downloading_files[path] = x
+        except Baidu8Secs as e:
+            logger.exception(e)
         except Exception as e :
             logger.exception(e)
         return 0
@@ -220,12 +224,9 @@ class CloudFS(Operations):
 
     def read(self, path, size, offset, fh):
         x = self.downloading_files[path]
-        d = x.get_cache(offset,size)
-        if not d :
-            return None
-        return d
-
-
+        if x:
+            return  x.get_cache(offset,size)
+        raise FuseOSError(errno.EIO)
     def updateCahe(self,old, new):
         directory = old[:old.rfind("/")]
         filename  = old[old.rfind("/")+1:]
