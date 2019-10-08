@@ -306,10 +306,12 @@ class CloudFS(Operations):
                 self.disk.upload(uploading_tmp.name,path)
                 self.writing_files[path]['uploading_tmp'].close()
 
-                del self.writing_files[path]
+                if path in self.writing_files:
+                    del self.writing_files[path]
 
                 # why ? prevent accidently read file when uploading still in progress
-                del self.downloading_files[path]
+                if path in self.downloading_files:
+                    del self.downloading_files[path]
                 
                 print("released",path)
                 return  
