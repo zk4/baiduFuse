@@ -4,10 +4,8 @@
 - Read dir in async mode. (You may see empty dir,but with actual fiels on cloud, that is because some file manager cache dir structure(rancher) when dir data is still on the way back from cloud, you need to get around this by yourself.the best solution is: Do not use ranger,use fff nnn)
 - Net scheduler is optimized for local read
 
+![arch](https://github.com/zk4/baiduFuse/blob/master/img/arch.jpg)
 
-
-
-![demo](https://github.com/zk4/baiduFuse/blob/master/img/d.gif)
 
 
 ## cloud driver support
@@ -19,7 +17,11 @@
    - move enc.1.mp4  to mounted baidu disk
    - enc.1.mp4 is only reasonable from mounted baidu disk, and is not reasonable when downloaded from baidu official client.
 
+
+![demo](https://github.com/zk4/baiduFuse/blob/master/img/d.gif)
+
 Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull request.
+
 ## usage 
 1. install python 3 
 1. install dependencies `pip install -r requirements.txt`
