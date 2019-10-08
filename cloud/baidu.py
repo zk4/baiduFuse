@@ -7,7 +7,7 @@ import requests
 import json
 from core.autoBDUSS import getBDUSS,cj
 from core.progress_requests import BufferReader, progress
- 
+import urllib.parse
 
 
 session = requests.Session()
@@ -21,7 +21,13 @@ class PCS():
         self.user_agent="netdisk;8.3.1;android-android"
         self.host = "pcs.baidu.com"
         self.BDUSS = getBDUSS()
-        self.header={'User-Agent': self.user_agent,'cookie':"BDUSS="+   self.BDUSS}
+        self.header={
+            'User-Agent': self.user_agent,
+            'cookie':"BDUSS="+   self.BDUSS,
+            'User-Agent':self.user_agent,
+            'host': "pcs.baidu.com",
+            'Accept-Encoding':"gzip"
+            }
 
     def delete(self,paths):
         url = "http://pcs.baidu.com/rest/2.0/pcs/file"
@@ -52,7 +58,27 @@ class PCS():
         response = session.get(url, headers=headers, params=querystring)
 
         return response.text
+    def meta2(self,path):
+        url = "http://pcs.baidu.com/rest/2.0/pcs/file"
 
+        querystring = {"app_id":self.app_id,"method":"meta"}
+        # formatPaths = json.dumps(list(map(lambda p : p, fileList)))
+        payload = "--96d1a91af576910cff0eeb87d943084349f801009e3622e00043d269d22d\nContent-Disposition: form-data; name=\"param\"\n\n{\"list\":[{\"path\":\""+path+"\"}]}\n--96d1a91af576910cff0eeb87d943084349f801009e3622e00043d269d22d--\n"
+
+        payload = payload.encode('utf-8')
+        headers = {
+            'host': "pcs.baidu.com",
+            'User-Agent':self.user_agent,
+            'Content-Type': "multipart/form-data; boundary=96d1a91af576910cff0eeb87d943084349f801009e3622e00043d269d22d",
+            'Cookie': "BDUSS="+self.BDUSS,
+        }
+
+
+        response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
+        
+        r= json.loads(response.text)
+
+        return r
     def meta(self,file_list):
         url = "http://pan.baidu.com/api/filemetas"
         data = {'target': json.dumps(file_list)}
@@ -132,7 +158,7 @@ class PCS():
         return response.text 
 
     def getRestUrl(self,url):
-        return "https://pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id="+self.app_id+"&path="+url
+        return "https://pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id="+self.app_id+"&path="+urllib.parse.quote(url,safe="")
 
     def mkdir(self,path):
         url = "http://pcs.baidu.com/rest/2.0/pcs/file"
@@ -143,7 +169,6 @@ class PCS():
             'cookie': "BDUSS="+self.BDUSS
             }
         response = requests.request("POST", url,  headers=headers, params=querystring)
-        print(response.text)
 
     def quota(self):
         url = "http://pcs.baidu.com/rest/2.0/pcs/quota"
@@ -156,4 +181,4 @@ class PCS():
             }
 
         response = requests.request("GET", url, headers=headers, params=querystring)
-        print(response.text)        
+

@@ -209,7 +209,7 @@ class CloudFS(Operations):
                             # don`t use lock as possiable as you can
                             pass
                 url = self.disk.getRestUrl(path)
-                x= Task(url,tmp,self.disk.getHeader())
+                x= Task(url,tmp,path,self.disk)
                 x.start()
                 self.downloading_files[path] = x
         except Baidu8Secs as e:

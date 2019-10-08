@@ -31,7 +31,13 @@ def handle(cache,task):
     m =task.mmap
     
     headers={ 'Range': "bytes={0}-{1}" .format(start, start+size-1), **user_headers}
-    r = session.get(url,allow_redirects=True, headers=headers, stream=True) 
+    # proxies={
+    #     "https":"127.0.0.1:18888",
+    #     "http":"127.0.0.1:18888"
+    # }
+   
+    r = session.get(url,allow_redirects=True,  headers=headers, stream=True )  
+
 
     istart=start
 

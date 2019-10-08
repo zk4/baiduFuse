@@ -35,7 +35,7 @@ class Task(object):
                 block_info["status"]="ing"                       
                 q.put((handle,[block_info,task],1))
 
-    def __init__(self,url,saved_path,headers=None):
+    def __init__(self,url,saved_path,path,cloud):
 
          
         # almost all the files need to read fast , other wise the app will frozen or exit 
@@ -48,11 +48,11 @@ class Task(object):
         if saved_path.split(".")[-1].lower()  in nonPreviewAbleExts:
             self.isPreviewAble=False
             logger.debug(f"{saved_path} is chunable")
-
+        self.path = path
         self.url= url
         self.saved_path = saved_path
-        self.user_headers=headers
-
+        self.cloud = cloud
+        self.user_headers=cloud.getHeader()
         self.part_size = 65536*4
         self.block_infos =[]
         self.current_file_size = 0
@@ -93,10 +93,12 @@ class Task(object):
                 if end-start>10:
                     return None
                 curRound+=1
+                print("wait ",curRound)
 
         except Exception as e:
-            logger.debug(f'{r[0]},{len(self.block_infos)},{self.saved_path}')
-            logger.exception(e) 
+            # logger.debug(f'index:{r[0]},block len:{len(self.block_infos)},path: {self.saved_path}')
+            # logger.exception(e) 
+            pass
 
 
         return None
@@ -108,22 +110,33 @@ class Task(object):
 
 
     def start(self): 
-        r = session.head(self.url,headers={ **self.user_headers}) 
+        size_retries = 5
+        cur_size_retries=0
+        while True:
+            r = self.cloud.meta2(self.path)
+            if "list" in r:
+                for l in r["list"]:
+                    self.file_size +=l["size"]
+                break
+            cur_size_retries+=1
+            if cur_size_retries > size_retries:
+                raise BaseException("得不到 size")
 
-        try: 
-            self.file_size = int(r.headers["content-length"]) 
-            if 'Location' in r.headers and 'issuecdn' in r.headers['Location']:
-                notification(self.saved_path[self.saved_path.rfind("/")+1:],"文件已变 8 秒~")
-                raise Baidu8Secs(self.saved_path)
-        except Exception as e : 
-            raise e 
-                
+        print("file size ------",self.file_size)
+        # try: 
+        #     self.file_size = int(r.headers["content-length"]) 
+        #     if 'Location' in r.headers and 'issuecdn' in r.headers['Location']:
+        #         notification(self.saved_path[self.saved_path.rfind("/")+1:],"文件已变 8 秒~")
+        #         raise Baidu8Secs(self.saved_path)
+        # except Exception as e : 
+        #     raise e  
+                  
         self.part_count = math.ceil(self.file_size / self.part_size)
 
         with open(self.saved_path, "wb")  as fp:
             fp.seek(self.file_size)
             fp.write(b'\0')
-            
+             
         self.mmap = Task.createMmap(self.saved_path,self.file_size)
         self.create_range()
         # pre start task to get data 
