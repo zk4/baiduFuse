@@ -4,7 +4,7 @@
 - Read dir in async mode. (You may see empty dir,but with actual fiels on cloud, that is because some file manager cache dir structure(rancher) when dir data is still on the way back from cloud, you need to get around this by yourself.the best solution is: Do not use ranger,use fff nnn)
 - Net scheduler is optimized for local read
 
-![arch](https://github.com/zk4/baiduFuse/blob/master/img/arch.jpg)
+![arch](https://github.com/zk4/baiduFuse/blob/master/img/arch2.jpg)
 
 
 
