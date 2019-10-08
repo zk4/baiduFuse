@@ -1,13 +1,12 @@
 
 ## feature 
-- Read dir in async mode. (You may see empty dir,but with actual fiels on cloud, that is because some file manager cache dir structure(rancher) when dir data is still on the way back from cloud, you need to get around this by yourself.the best solution is: Do not use ranger,use fff nnn)
-- Net scheduler is optimized for local read
 - Support all disk manipulating with baidu cloud,including read,delete,mkdir,cp,mv,etc, highly optimized for reading. Try opening any file , even a big file. You shall see the magic.
+- Read dir in async mode. (You may see empty dir,but with actual fiels on cloud, that is because some file manager cache dir structure(rancher) when dir data is still on the way back from cloud, you need to get around this by yourself.the best solution is: Do not use ranger,use fff nnn)
 - Auto fetch credential from Chrome browser
 - ! support local encrpyt,default key is `123`, steps:
- - add prefix `enc.` to  the local file name, ex   `1.mp4 -> enc.1.mp4`
- - move enc.1.mp4  to mounted baidu disk
- - enc.1.mp4 is only reasonable from mounted baidu disk, and is not reasonable when downloaded from baidu official client.
+  - add prefix `enc.` to  the local file name, ex   `1.mp4 -> enc.1.mp4`
+  - move enc.1.mp4  to mounted baidu disk
+  - enc.1.mp4 is only reasonable from mounted baidu disk, and is not reasonable when downloaded from baidu official client.
 
 ![arch](https://github.com/zk4/baiduFuse/blob/master/img/arch2.jpg)
 
