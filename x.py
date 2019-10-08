@@ -28,6 +28,7 @@ from log import funcLog,logger
 from cloud.baidu import PCS 
 from core.task  import Task
 from core.custom_exceptions import *
+from core.cipher import cipher
 
 
 dirReaderDaemon = Pool(1)
@@ -215,7 +216,21 @@ class CloudFS(Operations):
     def read(self, path, size, offset, fh):
         x = self.downloading_files[path]
         if x:
-            return  x.get_cache(offset,size)
+            data =   x.get_cache(offset,size)
+            encrpted_length = 3
+            
+            filename  = path[path.rfind("/")+1:]
+            if filename.startswith("enc."):
+                if offset ==0  :
+                    if len(data)> encrpted_length:
+                        data = cipher(data,0,encrpted_length,123)
+#                         data = bytearray(data)
+#                         for i in range(encrpted_length):
+#                             data[i] = encrpted[i]
+                    else:
+                        print("decrpt failed!")
+            return data
+            
         raise FuseOSError(errno.EIO)
     def updateCahe(self,old, new):
         directory = old[:old.rfind("/")]
@@ -307,7 +322,17 @@ class CloudFS(Operations):
 #             os.remove(uploading_tmp)
             pass
     def write(self, path, data, offset, fp):
-        # TODO 回调 request 的 progress
+        encrpted_length = 3
+        
+        filename  = path[path.rfind("/")+1:]
+        if filename.startswith("enc."):
+            if offset ==0  and len(data)> encrpted_length:
+                data = bytearray(data)
+                data = cipher(data,0,encrpted_length,123)
+#                 print("xxxxxxxxxxxxxxxxxx",type(data))
+#                 for i in range(encrpted_length):
+#                     data[i] = encrptedki]
+            
     
         length = len(data)
         self.writing_files[path]["st_size"] += length
