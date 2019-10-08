@@ -222,7 +222,7 @@ class CloudFS(Operations):
             filename  = path[path.rfind("/")+1:]
             if filename.startswith("enc."):
                 if offset ==0  :
-                    if len(data)> encrpted_length:
+                    if data and len(data)> encrpted_length:
                         data = bytes(cipher(data,0,encrpted_length,123))
                     else:
                         print("decrpt failed!")
@@ -324,7 +324,7 @@ class CloudFS(Operations):
         
         filename  = path[path.rfind("/")+1:]
         if filename.startswith("enc."):
-            if offset ==0  and len(data)> encrpted_length:
+            if offset ==0  and data and  len(data)> encrpted_length:
                 data = bytes(cipher(data,0,encrpted_length,123))
     
         length = len(data)
