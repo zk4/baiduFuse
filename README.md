@@ -37,6 +37,7 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
 - [ ] bug: upload file not update cache 
 - [ ] why open the file so fast after uploading an file?
 - [ ] improvment: display true disk meta data
+- [ ] improvment: when write with finder on mac, a lot of garbage file occurs with `.` or `_`  in the name prefix 
 - [x] encrpyt on the fly! 
    this would be an exciting feature,you file would be 100%p safe on any cloud. I will try to use the common encrty method to encrpt the file. so you can Mannuly donwload your file from  cloud, and decrypt it without baiduFuse.
 - [ ] No response reading from net will drop the read operation. This should be configurable, now it is fixed value 10 seconds.
