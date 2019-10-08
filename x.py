@@ -30,6 +30,7 @@ from core.task  import Task
 from core.custom_exceptions import *
 from core.cipher import cipher
 
+encrpted_length = 512
 
 dirReaderDaemon = Pool(1)
 pool = Pool(5)
@@ -217,7 +218,6 @@ class CloudFS(Operations):
         x = self.downloading_files[path]
         if x:
             data =   x.get_cache(offset,size)
-            encrpted_length = 3
             
             filename  = path[path.rfind("/")+1:]
             if filename.startswith("enc."):
@@ -321,7 +321,6 @@ class CloudFS(Operations):
 #             os.remove(uploading_tmp)
             pass
     def write(self, path, data, offset, fp):
-        encrpted_length = 3
         
         filename  = path[path.rfind("/")+1:]
         if filename.startswith("enc."):
