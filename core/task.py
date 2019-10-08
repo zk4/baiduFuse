@@ -35,9 +35,16 @@ class Task(object):
                 block_info["status"]="ing"                       
                 q.put((handle,[block_info,task],1))
 
-    def __init__(self,url,saved_path,path,cloud):
+    def __init__(self,url,path,cloud):
 
-         
+        saved_path = "./tmp"+path
+        if not os.path.exists(os.path.dirname(saved_path)):
+            try:
+                os.makedirs(os.path.dirname(saved_path))
+            except OSError as exc: 
+                # Guard against race condition
+                # don`t use lock as possiable as you can
+                pass         
         # almost all the files need to read fast , other wise the app will frozen or exit 
 #         previewableExts={ "mkv","mpv","mp3","mp4","flv","ts","mov","avi","aac","flac","asf","rma","rmvb", \
 #                 "rm","ogg","mpeg","vob","m4a","wma","wmv","3gp","zip","rar","tar","7z","pdf","doc","docx","xls","xlsx","dmg" }

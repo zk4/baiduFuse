@@ -199,17 +199,8 @@ class CloudFS(Operations):
         # method does not have thread race problem, open by one thread only
         try:
             if path not in self.downloading_files:
-                tmp = "./tmp"+path
-                if path not in self.downloading_files:
-                    if not os.path.exists(os.path.dirname(tmp)):
-                        try:
-                            os.makedirs(os.path.dirname(tmp))
-                        except OSError as exc: 
-                            # Guard against race condition
-                            # don`t use lock as possiable as you can
-                            pass
                 url = self.disk.getRestUrl(path)
-                x= Task(url,tmp,path,self.disk)
+                x= Task(url,path,self.disk)
                 x.start()
                 self.downloading_files[path] = x
         except Baidu8Secs as e:
