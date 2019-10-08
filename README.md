@@ -36,7 +36,8 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
 - [ ] No response reading from net will drop the read operation. This should be configurable, now it is fixed value 10 seconds.
 - [x] 百度 8 秒与本地应用兼容问题,本地 size 与 网络头 size 不一致.
 - [ ] 将 cache 加上超时
-## tips
+- [ ] 改完名后,文件读有问题
+## tips  
 ### mpv (ftp on fuse)
 https://github.com/mpv-player/mpv/issues/5449
 

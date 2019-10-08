@@ -184,7 +184,6 @@ class CloudFS(Operations):
         pool.submit(self.readdirAsync,path,2,pool)  
         if path  in self.dir_buffer:
 #             logger.info(f'{path},{self.dir_buffer[path]}')
-            print("hit dir cache",path)
             for r in self.dir_buffer[path]:
                 yield r
         else:
