@@ -68,6 +68,15 @@ class Task(object):
         self.mmap = None
         self.part_count=None
 
+    def get_url(self):
+        return self.url
+
+    def is_terminating(self):
+        return self.terminating
+
+    def get_mmap(self):
+        return self.mmap
+
     def get_cache(self,offset,size):
         try:
             r = self.get_block_range(offset,size)

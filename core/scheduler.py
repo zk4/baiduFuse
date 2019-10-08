@@ -25,10 +25,9 @@ def target():
 def handle(cache,task): 
     start=cache["start"]
     size=cache["size"]
-    url=task.url
+    url=task.get_url()
     user_headers=task.user_headers
-    saved_path=task.saved_path
-    m =task.mmap
+    m =task.get_mmap()
     
     headers={ 'Range': "bytes={0}-{1}" .format(start, start+size-1), **user_headers}
     # proxies={
@@ -59,7 +58,7 @@ def handle(cache,task):
                 logger.info(e)
 
             finally:
-                if task.terminating:
+                if task.is_terminating():
                     return
             istart = istart + dataLen
     cache['status'] = "done"

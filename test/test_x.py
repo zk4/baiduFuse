@@ -15,8 +15,6 @@ def sha256sum(filename):
             h.update(mv[:n])
     return h.hexdigest()
 
-def test_mnt():
-    assert os.stat("../mnt2/1.mp4").st_size == 23129494
 
 
 def test_open_file():
