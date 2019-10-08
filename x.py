@@ -223,10 +223,7 @@ class CloudFS(Operations):
             if filename.startswith("enc."):
                 if offset ==0  :
                     if len(data)> encrpted_length:
-                        data = cipher(data,0,encrpted_length,123)
-#                         data = bytearray(data)
-#                         for i in range(encrpted_length):
-#                             data[i] = encrpted[i]
+                        data = bytes(cipher(data,0,encrpted_length,123))
                     else:
                         print("decrpt failed!")
             return data
@@ -329,12 +326,7 @@ class CloudFS(Operations):
         filename  = path[path.rfind("/")+1:]
         if filename.startswith("enc."):
             if offset ==0  and len(data)> encrpted_length:
-                data = bytearray(data)
-                data = cipher(data,0,encrpted_length,123)
-#                 print("xxxxxxxxxxxxxxxxxx",type(data))
-#                 for i in range(encrpted_length):
-#                     data[i] = encrptedki]
-            
+                data = bytes(cipher(data,0,encrpted_length,123))
     
         length = len(data)
         self.writing_files[path]["st_size"] += length

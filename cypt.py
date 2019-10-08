@@ -18,29 +18,19 @@ def demo():
 
 
 def cipher(data,offset,size,intkey):
-    bytw = bytearray()
+    bytw = bytearray(data)
     b = bytearray(1)
     random.seed(intkey) # key
     for i in range(offset,size):
         b[0]=  data[i] ^ random.randint(0, 255)
-        bytw.extend(b)
+        bytw[i] = ord(b)
     return bytw
 
-
-def encryt():
-    f1 = open( "./test.md", "rb")
-    bytearr = f1.read ()
-    wrote = cipher(bytearr,0,3,123)
-    f2 = open("./test.md.e" , "wb" )
-    f2.write(wrote)
-    f2.write(bytearr[3:])
-    f2.close()
-f1 = open( "./test.md.e", "rb")
+f1 = open( "./test.md", "rb")
 b = f1.read ()
 bytearr = bytearray(b)
-bytearr[7]=ord('A')
+bytearr[7]=ord('b')
 wrote = cipher(bytearr,0,3,123)
 f2 = open("./test.md.o" , "wb" )
 f2.write(wrote)
-f2.write(bytearr[3:])
 f2.close()

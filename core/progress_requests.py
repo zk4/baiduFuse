@@ -31,5 +31,6 @@ class BufferReader(io.BytesIO):
 
 
 def progress(size=None, progress=None):
-    print("{0} / {1}".format(size, progress))
+    pass
+#     print("{0} / {1}".format(size, progress))
 
