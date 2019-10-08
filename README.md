@@ -14,10 +14,10 @@
 - [x] 百度盘 
  - Support all disk manipulating with baidu cloud,including read,delete,mkdir,cp,mv,etc, highly optimized for reading. Try opening any file , even a big file. You shall see the magic.
  - Auto fetch credential from Chrome browser
- - 支持加密,默认密钥 123
-   - 将本地文件名前面加上 `enc.`. 比如  1.mp4 -> enc.1.mp4
-   - 将 enc.1.mp4 复制/移动 到挂载的百度盘里
-   - enc.1.mp4 则只能通过挂载盘打开
+ - support local encrpyt,default key is `123`, steps:
+   - add prefix `enc.` to  the local file name, ex   `1.mp4 -> enc.1.mp4`
+   - move enc.1.mp4  to mounted baidu disk
+   - enc.1.mp4 is only reasonable from mounted baidu disk, and is not reasonable when downloaded from baidu official client.
 
 Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull request.
 ## usage 
@@ -38,7 +38,7 @@ Patch the other cloud dirver is super easy. Check cloud/baidu.py. Make a pull re
 - [x] encrpyt on the fly! 
    this would be an exciting feature,you file would be 100%p safe on any cloud. I will try to use the common encrty method to encrpt the file. so you can Mannuly donwload your file from  cloud, and decrypt it without baiduFuse.
 - [ ] No response reading from net will drop the read operation. This should be configurable, now it is fixed value 10 seconds.
-- [ ] 将 cache 加上超时
+- [ ] add expried time to cache?
 ## tips  
 ### mpv (ftp on fuse)
 https://github.com/mpv-player/mpv/issues/5449
