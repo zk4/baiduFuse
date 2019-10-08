@@ -24,7 +24,7 @@ from concurrent.futures  import ThreadPoolExecutor as Pool
 from threading import Lock
 
 
-from log import funcLog,logger
+from core.log import funcLog,logger
 from cloud.baidu import PCS 
 from core.task  import Task
 from core.custom_exceptions import *

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from log import logger,funcLog
+from core.log import logger,funcLog
 import requests
 import json
 from core.autoBDUSS import getBDUSS,cj

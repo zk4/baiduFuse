@@ -6,7 +6,7 @@ import queue
 import requests 
 import threading
 import logging
-from log import logger,funcLog
+from core.log import logger,funcLog
 
 def target():
   while True:

@@ -10,7 +10,7 @@ import os
 import threading
 import mmap
 import logging
-from log import logger,funcLog
+from core.log import logger,funcLog
 from core.scheduler import handle,q,session
 from core.custom_exceptions import Baidu8Secs
 from utils.utils import notification
