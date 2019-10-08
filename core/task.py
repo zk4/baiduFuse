@@ -13,7 +13,7 @@ import logging
 from log import logger,funcLog
 from core.scheduler import handle,q,session
 from core.custom_exceptions import Baidu8Secs
-
+from utils.utils import notification
 logger.setLevel(logging.DEBUG)
 
 
@@ -131,6 +131,8 @@ class Task(object):
         try: 
             self.file_size = int(r.headers["content-length"]) 
             if 'Location' in r.headers and 'issuecdn' in r.headers['Location']:
+
+                notification(self.saved_path[self.saved_path.rfind("/")+1:],"文件已变 8 秒~")
                 raise Baidu8Secs(self.saved_path)
         except Exception as e : 
             raise e 
