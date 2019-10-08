@@ -28,7 +28,7 @@ def handle(cache,task):
     url=task.url
     user_headers=task.user_headers
     saved_path=task.saved_path
-    m =task.m
+    m =task.mmap
     
     headers={ 'Range': "bytes={0}-{1}" .format(start, start+size-1), **user_headers}
     r = session.get(url,allow_redirects=True, headers=headers, stream=True) 

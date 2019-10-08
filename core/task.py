@@ -26,14 +26,14 @@ class Task(object):
         isPreviewAble = task.isPreviewAble
         preDownloadPart = 30 if isPreviewAble else 30
         for i in range(startIdx,endIdx+preDownloadPart):
-            if i >= len(task.cache):
+            if i >= len(task.block_infos):
                 break
 
-            cache =task.cache[i]
+            block_info =task.block_infos[i]
             
-            if cache["status"] is  None: 
-                cache["status"]="ing"                       
-                q.put((handle,[cache,task],1))
+            if block_info["status"] is  None: 
+                block_info["status"]="ing"                       
+                q.put((handle,[block_info,task],1))
 
     def __init__(self,url,saved_path,headers=None):
 
