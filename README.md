@@ -52,7 +52,7 @@ chmod 777 dev-watch.sh test-watch.sh
 you can make a ftp server on moutned disk, but there is a catchy when pay media file with mpv. see the below.It is not a bug of this project.
 https://github.com/mpv-player/mpv/issues/5449
 
-demo server
+make a demo server
 ``` bash
 cd  /mnt/
 python -m pyftpdlib
@@ -61,21 +61,31 @@ mpv    --cache=no  ftp://192.168.1.15:2121/2.mkv
 mpv    --cache=no ftp://192.168.1.15:2121/锦绣良缘粤语Gotv/锦绣良缘19.mkv 
 ```
 
+## help 
+``` text 
+usage: x.py [-h] [-k KEY] [-m MOUNT] [-b BDUSS]
 
-## write file (beta)
-Write file is a little bit tricky to implement in fuse. you can`t get source file name in fuse, but only source bytes. so a temp file is needed to be an mediator.
--  statfs 
-   to confirm disk free size is avaiable 
--  create  
-   normally create a file with open function, differs from open api in fuse interface which opens an existing file  
--  getattr 
-   mainly check permission, and other file info 
--  write 
-   will be called multipal times, write source bytes to remote 
--  flush 
-   will be called once
--  release
-   will be called once
+Ex: 
+    # chmod 777 x.sh  &&  ./x.sh 
+
+Encrption:
+mountDisk --> fuse (encrpt) --> cloud 
+mountDisk <-- fuse (decrpt) <-- cloud
+
+Don`t change your key while there are already encrpyted file on cloud
+
+    
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -k KEY, --key KEY     specifiy encrpyt key, Numbers only
+  -m MOUNT, --mount MOUNT
+                        local mount point
+  -b BDUSS, --BDUSS BDUSS
+                        By default, BDUSS will be fetched from Chrome Browser
+                        automatically,but you can specifiy it manually
+
+```
 
 
 ## reference 

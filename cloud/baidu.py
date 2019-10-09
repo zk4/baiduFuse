@@ -21,7 +21,10 @@ class PCS():
         self.app_id="266719"
         self.user_agent="netdisk;8.3.1;android-android"
         self.host = "pcs.baidu.com"
-        self.BDUSS = getBDUSS()
+        if self.mainArgs.BDUSS:
+            self.BDUSS = self.mainArgs.BDUSS
+        else:
+            self.BDUSS = getBDUSS()
         self.header={
             'User-Agent': self.user_agent,
             'cookie':"BDUSS="+   self.BDUSS,
