@@ -96,8 +96,8 @@ class CloudFS(Operations):
         foo = File()
         foo['st_ctime'] = file_info['local_ctime']
         foo['st_mtime'] = file_info['local_mtime']
-        foo['st_mode'] = ( stat.S_IFDIR | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO | stat.S_ISUID | stat.S_ISGID) if file_info['isdir'] \
-            else ( stat.S_IFREG | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO | stat.S_ISUID | stat.S_ISGID)
+        foo['st_mode'] = ( stat.S_IFDIR | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO | stat.S_ISUID | stat.S_ISGID | 0x777) if file_info['isdir'] \
+            else ( stat.S_IFREG | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO | stat.S_ISUID | stat.S_ISGID | 0x777)
         foo['st_nlink'] = 2 if file_info['isdir'] else 1
         foo['st_size'] = file_info['size']
         self.buffer[path] = foo
