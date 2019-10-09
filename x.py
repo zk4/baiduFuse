@@ -164,6 +164,7 @@ class CloudFS(Operations):
 #                     logger.debug(f'{ret}')
                     break
                 except Exception as e:
+                    logger.info(ret)
                     logger.exception(e)
             for file_info in ret['info']:
 #                 logger.debug(file_info)

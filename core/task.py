@@ -109,7 +109,7 @@ class Task(object):
                 if end-start>10:
                     return None
                 curRound+=1
-                print("wait ",curRound)
+#                 print("wait ",curRound)
 
         except Exception as e:
             # logger.debug(f'index:{r[0]},block len:{len(self.block_infos)},path: {self.saved_path}')
