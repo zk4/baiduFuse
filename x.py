@@ -10,6 +10,7 @@ import json
 import time
 import time
 import tempfile
+import argparse
 from diskcache import Cache
 from io import BytesIO
 import logging
@@ -321,11 +322,12 @@ class CloudFS(Operations):
 #             logger.info("delete uploading_tmp:", uploading_tmp)
 #             os.remove(uploading_tmp)
             pass
+
     def write(self, path, data, offset, fp):
         
         filename  = path[path.rfind("/")+1:]
         if filename.startswith("enc."):
-            if offset ==0  and data and  len(data)> encrpted_length:
+            if offset == 0  and data and  len(data) > encrpted_length:
                 data = bytes(cipher(data,0,encrpted_length,123))
     
         length = len(data)
