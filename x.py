@@ -163,8 +163,8 @@ class CloudFS(Operations):
                     ret = json.loads(self.disk.meta(obj))
 #                     logger.debug(f'{ret}')
                     break
-                except:
-                    logger.info('error')
+                except Exception as e:
+                    logger.exception(e)
             for file_info in ret['info']:
 #                 logger.debug(file_info)
                 self._add_file_to_buffer(file_info['path'],file_info)

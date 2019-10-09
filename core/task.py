@@ -136,6 +136,7 @@ class Task(object):
                 break
             cur_size_retries+=1
             if cur_size_retries > size_retries:
+                print(r)
                 raise BaseException("得不到 size")
 
         print("file size ------",self.file_size)
