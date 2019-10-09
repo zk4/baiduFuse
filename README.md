@@ -30,13 +30,13 @@
 brew install watchexec 
 pip install pipreqs
 
-chmod 777 dev-watch.sh test-watch.sh
-# It will automatically load when py files changed
-./dev-watch.sh
+make dev 
 
-# automatically load test file
-./test-watch.sh
+# run test 
+make test 
 
+# create requirements.txt 
+make dist 
 ```
 ## todo 
 - [ ] improvment!!: reduce local disk size,( maybe download in memory)
@@ -47,6 +47,7 @@ chmod 777 dev-watch.sh test-watch.sh
    this would be an exciting feature,you file would be safer on any cloud. I will try to use a fast method to encrpt the file . 
 - [ ] make encrpytion verisoned.
 - [ ] add expried time to cache?
+- [ ] write directly to baidupan, EX. use vim edit an text file, then save, BOOM! on cloud
 ## tips  
 ### mpv (ftp on fuse)
 you can make a ftp server on moutned disk, but there is a catchy when pay media file with mpv. see the below.It is not a bug of this project.
