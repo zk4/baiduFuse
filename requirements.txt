@@ -1,7 +1,7 @@
-browser_cookie3==0.7.6
-requests==2.20.0
 pytest==3.2.2
-colorama==0.4.1
-diskcache==4.0.0
+requests==2.20.0
 termcolor==1.1.0
+browser_cookie3==0.7.6
+diskcache==4.0.0
+colorama==0.4.1
 fusepy==3.0.1
