@@ -24,6 +24,20 @@
 
 ![demo](https://github.com/zk4/baiduFuse/blob/master/img/d.gif)
 
+## dev 
+``` bash
+# some dev tools, just for convenience. You could skip this,then you need to config the dev enviroment yourself
+brew install watchexec 
+pip install pipreqs
+
+chmod 777 dev-watch.sh test-watch.sh
+# It will automatically load when py files changed
+./dev-watch.sh
+
+# automatically load test file
+./test-watch.sh
+
+```
 ## todo 
 - [ ] improvment!!: reduce local disk size,( maybe download in memory)
 - [ ] why open the file so fast after uploading an file?
