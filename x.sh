@@ -3,7 +3,7 @@
 ps aux | grep "[m]nt2" | awk {'print $2'} |xargs kill -9 
 
 # make requirements.txt
-preqs --force .  &
+pipreqs --force .  &
 
 diskutil unmount force  ../mnt2
 
