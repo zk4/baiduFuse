@@ -6,7 +6,7 @@
 - ! support local encrpyt,default key is `123`, steps:
   - add prefix `enc.` to  the local file name, ex   `1.mp4 -> enc.1.mp4`
   - move enc.1.mp4  to mounted baidu disk
-  - enc.1.mp4 is only reasonable from mounted baidu disk, and is not reasonable when downloaded from baidu official client.
+  - enc.1.mp4 is only reasonable from mounted baidu disk, and is not when downloaded from baidu official client.
 
 ![arch](https://github.com/zk4/baiduFuse/blob/master/img/arch2.jpg)
 
