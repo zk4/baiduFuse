@@ -76,7 +76,7 @@ class CloudFS(Operations):
     '''Baidu netdisk filesystem'''
 
     def __init__(self,mainArgs,  *args, **kw):
-        self.buffer = Cache('./cache/buffer')
+        self.buffer ={}# Cache('./cache/buffer')
         self.dir_buffer = Cache('./cache/dir_buffer')
         self.mainArgs = mainArgs
 
@@ -96,8 +96,8 @@ class CloudFS(Operations):
         foo = File()
         foo['st_ctime'] = file_info['local_ctime']
         foo['st_mtime'] = file_info['local_mtime']
-        foo['st_mode'] = ( stat.S_IFDIR | 0x777) if file_info['isdir'] \
-            else (stat.S_IFREG | 0x777)
+        foo['st_mode'] = ( stat.S_IFDIR | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO | stat.S_ISUID | stat.S_ISGID) if file_info['isdir'] \
+            else ( stat.S_IFREG | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO | stat.S_ISUID | stat.S_ISGID)
         foo['st_nlink'] = 2 if file_info['isdir'] else 1
         foo['st_size'] = file_info['size']
         self.buffer[path] = foo
@@ -107,6 +107,7 @@ class CloudFS(Operations):
         self.buffer.pop(path)
 
 
+#     @funcLog
     def getattr(self, path, fh=None):
         if path in self.writing_files:
             return self.writing_files[path]
@@ -287,7 +288,7 @@ class CloudFS(Operations):
             if path not in self.writing_files:
                 t = time.time()
                 self.writing_files[path] = {
-                'st_atime': t, 'st_ctime': t, 'st_gid': 20, 'st_mode': stat.S_IFREG | 0x777, 'st_mtime': t, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502,
+                'st_atime': t, 'st_ctime': t, 'st_gid': 20, 'st_mode': stat.S_IFREG |stat.S_ISUID | stat.S_ISGID| 0x777, 'st_mtime': t, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502,
                 'uploading_tmp':tempfile.NamedTemporaryFile('wb')
                 }  
         return 0

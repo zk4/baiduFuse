@@ -2,9 +2,6 @@
 # kill local 
 ps aux | grep "[m]nt2" | awk {'print $2'} |xargs kill -9 
 
-# make requirements.txt
-pipreqs --force .  &
-
 diskutil unmount force  ../mnt2
 
 /bin/rm -rdf ./tmp
