@@ -29,7 +29,7 @@
 - [ ] why open the file so fast after uploading an file?
 - [ ] improvment: display true disk meta data
 - [ ] improvment: when write with finder on mac, a lot of garbage file occurs with `.` or `_`  in the name prefix 
-- [x] encrpyt on the fly! 
+- [x] encrpytion on the fly! 
    this would be an exciting feature,you file would be safer on any cloud. I will try to use a fast method to encrpt the file . 
 - [ ] No response reading from net will drop the read operation. This should be configurable, now it is fixed value 10 seconds.
 - [ ] add expried time to cache?

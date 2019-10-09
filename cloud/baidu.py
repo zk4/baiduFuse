@@ -16,7 +16,8 @@ session.mount('http://', a)
 session.mount('https://', a)
 
 class PCS():
-    def __init__(self,*args, **kw):
+    def __init__(self,mainArgs,*args, **kw):
+        self.mainArgs = mainArgs
         self.app_id="266719"
         self.user_agent="netdisk;8.3.1;android-android"
         self.host = "pcs.baidu.com"

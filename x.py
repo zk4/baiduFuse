@@ -75,12 +75,13 @@ class File():
 class CloudFS(Operations):
     '''Baidu netdisk filesystem'''
 
-    def __init__(self,  *args, **kw):
+    def __init__(self,mainArgs,  *args, **kw):
         self.buffer = Cache('./cache/buffer')
         self.dir_buffer = Cache('./cache/dir_buffer')
+        self.mainArgs = mainArgs
 
         self.traversed_folder = {}
-        self.disk = PCS()
+        self.disk = PCS(self.mainArgs)
 
         self.createLock = Lock()
 
@@ -204,7 +205,7 @@ class CloudFS(Operations):
         try:
             if path not in self.downloading_files:
                 url = self.disk.getRestUrl(path)
-                x= Task(url,path,self.disk)
+                x= Task(url,mainArgs,path,self.disk)
                 x.start()
                 self.downloading_files[path] = x
         except Baidu8Secs as e:
@@ -219,13 +220,13 @@ class CloudFS(Operations):
     def read(self, path, size, offset, fh):
         x = self.downloading_files[path]
         if x:
-            data =   x.get_cache(offset,size)
+            data = x.get_cache(offset,size)
             
             filename  = path[path.rfind("/")+1:]
             if filename.startswith("enc."):
                 if offset ==0  :
                     if data and len(data)> encrpted_length:
-                        data = bytes(cipher(data,0,encrpted_length,123))
+                        data = bytes(cipher(data,0,encrpted_length,self.mainArgs.key))
                     else:
                         print("decrpt failed!")
             return data
@@ -328,7 +329,7 @@ class CloudFS(Operations):
         filename  = path[path.rfind("/")+1:]
         if filename.startswith("enc."):
             if offset == 0  and data and  len(data) > encrpted_length:
-                data = bytes(cipher(data,0,encrpted_length,123))
+                data = bytes(cipher(data,0,encrpted_length,self.mainArgs.key))
     
         length = len(data)
         self.writing_files[path]["st_size"] += length
@@ -341,10 +342,33 @@ class CloudFS(Operations):
         pass
 
     def statfs(self, path):
+        # TODO read from cloud disk 
         return {'f_bavail': int(85533433401/4096), 'f_bfree': int(85533433401/4096),  # 相同的值  block
                 'f_favail': 4290675908, 'f_ffree': 4290675908,  # 相同的值  node
                 'f_bsize': 104857,  # perferd value 
         'f_blocks': int(5611374772224/8),  'f_files': 4294967279, 'f_flag': 0, 'f_frsize': 4096, 'f_namemax': 255}
+
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+             formatter_class=argparse.RawDescriptionHelpFormatter,
+             description='''
+Ex: 
+    # chmod 777 x.sh  &&  ./x.sh 
+
+
+Encrption:
+mountDisk --> fuse (encrpt) --> cloud 
+mountDisk <-- fuse (decrpt) <-- cloud
+
+Don`t change your key while there are already encrpyted file on cloud
+
+    
+''',
+    )
+    parser.add_argument("-k",'--key', type=str,default="123",required=False, help='specifiy encrpyt key, Numbers only')
+    parser.add_argument("-m",'--mount', type=str, required=False, help='local mount point')
     logger.info(colored("- fuse 4 cloud driver -", 'red'))
-    FUSE(CloudFS(),sys.argv[1],foreground=True,nonempty=False,async_read=True,raw_fi=True)
+
+    mainArgs = parser.parse_args()
+
+    FUSE(CloudFS(mainArgs),mainArgs.mount,foreground=True,nonempty=False,async_read=True,raw_fi=True)

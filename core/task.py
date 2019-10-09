@@ -35,8 +35,9 @@ class Task(object):
                 block_info["status"]="ing"                       
                 q.put((handle,[block_info,task],1))
 
-    def __init__(self,url,path,cloud):
+    def __init__(self,url,mainArgs,path,cloud):
 
+        self.mainArgs = mainArgs
         saved_path = "./tmp"+path
         if not os.path.exists(os.path.dirname(saved_path)):
             try:
