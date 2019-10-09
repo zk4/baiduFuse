@@ -1,5 +1,5 @@
 
-## feature 
+# feature 
 - Support all disk manipulating with baidu cloud,including read,delete,mkdir,cp,mv,etc, highly optimized for reading. Try opening any file , even a big file. You shall see the magic.
 - Read dir in async mode. (You may see empty dir,but with actual fiels on cloud, that is because some file manager cache dir structure(rancher) when dir data is still on the way back from cloud, you need to get around this by yourself.the best solution is: Do not use ranger,use fff nnn)
 - Auto fetch credential from Chrome browser
@@ -12,7 +12,7 @@
 
 
 
-## usage 
+# usage 
 1. install python 3 
 1. install dependencies `pip install -r requirements.txt`
 1. login in http://pan.baidu.com with **chrome browser** (for the credential to fetch )
@@ -24,7 +24,7 @@
 
 ![demo](https://github.com/zk4/baiduFuse/blob/master/img/d.gif)
 
-## dev 
+# dev 
 ``` bash
 # some dev tools, just for convenience. You could skip this,then you need to config the dev enviroment yourself
 brew install watchexec 
@@ -38,7 +38,7 @@ make test
 # create requirements.txt 
 make dist 
 ```
-## todo 
+# todo 
 - [ ] improvment!!: reduce local disk size,( maybe download in memory)
 - [ ] why open the file so fast after uploading an file?
 - [ ] improvment: display true disk meta data
@@ -48,8 +48,8 @@ make dist
 - [ ] make encrpytion verisoned.
 - [ ] add expried time to cache?
 - [ ] write directly to baidupan, EX. use vim edit an text file, then save, BOOM! on cloud
-## tips  
-### mpv (ftp on fuse)
+# tips  
+## mpv (ftp on fuse)
 you can make a ftp server on moutned disk, but there is a catchy when pay media file with mpv. see the below.It is not a bug of this project.
 https://github.com/mpv-player/mpv/issues/5449
 
@@ -62,7 +62,7 @@ mpv    --cache=no  ftp://192.168.1.15:2121/2.mkv
 mpv    --cache=no ftp://192.168.1.15:2121/锦绣良缘粤语Gotv/锦绣良缘19.mkv 
 ```
 
-## help 
+# help 
 ``` text 
 usage: x.py [-h] [-k KEY] [-m MOUNT] [-b BDUSS]
 
@@ -89,7 +89,7 @@ optional arguments:
 ```
 
 
-## reference 
+# reference 
 just for myself reference
 - [intro](https://www.stavros.io/posts/python-fuse-filesystem/)
 - [intro 2](http://www.maastaar.net/fuse/linux/filesystem/c/2016/05/21/writing-a-simple-filesystem-using-fuse/)
