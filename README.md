@@ -49,6 +49,7 @@ chmod 777 dev-watch.sh test-watch.sh
 - [ ] add expried time to cache?
 ## tips  
 ### mpv (ftp on fuse)
+you can make a ftp server on moutned disk, but there is a catchy when pay media file with mpv. see the below.It is not a bug of this project.
 https://github.com/mpv-player/mpv/issues/5449
 
 demo server
