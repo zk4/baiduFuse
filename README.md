@@ -47,7 +47,7 @@ make dist
    this would be an exciting feature,you file would be safer on any cloud. I will try to use a fast method to encrpt the file . 
 - [ ] make encrpytion verisoned.
 - [ ] add expried time to cache?
-- [ ] bug!! can not overwrite file. 
+- [ ] improvment!! overwrite file. 
 # tips  
 ## mpv (ftp on fuse)
 you can make a ftp server on moutned disk, but there is a catchy when pay media file with mpv. see the below.It is not a bug of this project.

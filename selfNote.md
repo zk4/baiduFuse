@@ -11,6 +11,7 @@ Write file is a little bit tricky to implement in fuse. you can`t get source fil
    will be called multipal times, write source bytes to remote 
 -  flush 
    will be called once
--  release
+kk-  release
    will be called once
+
 
