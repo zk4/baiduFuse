@@ -44,10 +44,11 @@ make dist
 - [ ] improvment: display true disk meta data
 - [ ] improvment: when write with finder on mac, a lot of garbage file occurs with `.` or `_`  in the name prefix 
 - [x] encrpytion on the fly! 
-   this would be an exciting feature,you file would be safer on any cloud. I will try to use a fast method to encrpt the file . 
+   Your file would be safer on any cloud. With a fast method to encrpt the file, you won't even notice it exists. But the safety is not that storng, but enough for baidu censership.
 - [ ] make encrpytion verisoned.
 - [ ] add expried time to cache?
 - [ ] improvment!! overwrite file. 
+- [ ] encrpyt file already on cloud
 # tips  
 ## mpv (ftp on fuse)
 you can make a ftp server on moutned disk, but there is a catchy when pay media file with mpv. see the below.It is not a bug of this project.
