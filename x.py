@@ -367,7 +367,7 @@ Don`t change your key while there are already encrpyted file on cloud
 ''',
     )
     parser.add_argument("-m",'--mount', type=str, required=True, help='local mount point, default is ../mnt2 in x.sh')
-    parser.add_argument("-k",'--key', type=str,default="123",required=False, help='specifiy encrpyt key, Numbers only')
+    parser.add_argument("-k",'--key', type=str,default="123",required=False, help='specifiy encrpyt key, any length of string, will use it hash code')
     parser.add_argument("-b",'--BDUSS', type=str, required=False, help='By default, BDUSS  will be fetched from Chrome Browser automatically,but you can specifiy it manually')
     logger.info(colored("- fuse 4 cloud driver -", 'red'))
 
