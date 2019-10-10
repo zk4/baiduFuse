@@ -25,7 +25,6 @@ from concurrent.futures  import ThreadPoolExecutor as Pool
 from threading import Lock
 
 
-from core.log import funcLog,logger
 from cloud.baidu import PCS 
 from core.task  import Task
 from core.custom_exceptions import *
@@ -37,6 +36,8 @@ dirReaderDaemon = Pool(1)
 pool = Pool(5)
 uploadDaemon = Pool(10)
 
+from core.log import funcLog,get_my_logger
+logger = get_my_logger(__name__)
 logger.setLevel(logging.DEBUG)
 
 class NoSuchRowException(Exception):
@@ -134,6 +135,7 @@ class CloudFS(Operations):
 
 
     def readdirAsync(self,path,depth=2,threadPool=pool):
+        logger.debug(f'readdirAsync: {path}')
         try:
             foo = json.loads(self.disk.list_files(path))
         except Exception as s:

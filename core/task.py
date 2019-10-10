@@ -10,11 +10,12 @@ import os
 import threading
 import mmap
 import logging
-from core.log import logger,funcLog
+from core.log import funcLog,get_my_logger
 from core.scheduler import handle,q,session
 from core.custom_exceptions import Baidu8Secs
 from utils.utils import notification
 
+logger = get_my_logger(__name__)
 class Task(object):
     @staticmethod
     def createMmap(filename,size, access=mmap.ACCESS_WRITE):

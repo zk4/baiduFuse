@@ -6,7 +6,10 @@ import queue
 import requests 
 import threading
 import logging
-from core.log import logger,funcLog
+from core.log import get_my_logger,funcLog
+
+logger = get_my_logger(__name__)
+logger.setLevel(logging.DEBUG)
 
 def target():
   while True:

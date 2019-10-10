@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from core.log import logger,funcLog
+from core.log import funcLog,get_my_logger
 import requests
 import json
 from core.autoBDUSS import getBDUSS,cj
 from core.progress_requests import BufferReader, progress
 import urllib.parse
 
+logger = get_my_logger(__name__)
 
 session = requests.Session()
 a = requests.adapters.HTTPAdapter(max_retries=3,pool_connections = 50, pool_maxsize = 200)
