@@ -15,3 +15,13 @@ kk-  release
    will be called once
 
 
+
+# reference 
+just for myself reference
+- [intro](https://www.stavros.io/posts/python-fuse-filesystem/)
+- [intro 2](http://www.maastaar.net/fuse/linux/filesystem/c/2016/05/21/writing-a-simple-filesystem-using-fuse/)
+- [stackoverflow](https://stackoverflow.com/questions/15604191/fuse-detailed-documentation)
+- [how-to-mount-and-manage-non-native-file-systems-in-os-x-with-fuse](https://www.macworld.com/article/2855038/how-to-mount-and-manage-non-native-file-systems-in-os-x-with-fuse.html)
+- [reference project ](https://github.com/joe42/CloudFusion)
+- [ly0 github](https://github.com/ly0/baidu-fuse)
+
