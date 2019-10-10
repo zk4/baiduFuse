@@ -44,7 +44,7 @@ make dist
 - [ ] improvment: display true disk meta data
 - [ ] improvment: when write with finder on mac, a lot of garbage file occurs with `.` or `_`  in the name prefix 
 - [x] encrpytion on the fly! 
-   Your file would be safer on any cloud. With a fast method to encrpt the file, you won't even notice it exists. But the safety is not that storng, but enough for baidu censership.
+   Your file would be safer on any cloud. With a fast method to encrpt the file, you won't even notice it exists. The safety is not that storng, but enough for baidu censership.
 - [ ] make encrpytion verisoned.
 - [ ] add expried time to cache?
 - [ ] improvment!! overwrite file. 
