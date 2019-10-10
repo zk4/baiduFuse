@@ -76,7 +76,7 @@ class CloudFS(Operations):
     '''Baidu netdisk filesystem'''
 
     def __init__(self,mainArgs,  *args, **kw):
-        self.buffer ={}# Cache('./cache/buffer')
+        self.buffer =Cache('./cache/buffer')
         self.dir_buffer = Cache('./cache/dir_buffer')
         self.mainArgs = mainArgs
 
