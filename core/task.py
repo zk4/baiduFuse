@@ -126,31 +126,10 @@ class Task(object):
         end_idx = (size + offset) // self.part_size
         return [start_idx,end_idx]
 
-
-    def getFileSize(self):
-        r = session.head(self.url,headers={ **self.user_headers}) 
-        try: 
-            self.file_size = int(r.headers["content-length"]) 
-            return self.file_size
-        except Exception as e : 
-            logger.info(e)
-            return    
         
     def start(self): 
-        size_retries = 5
-        cur_size_retries=0
-        while True:
-            r = self.cloud.meta2(self.path)
-            if "list" in r:
-                for l in r["list"]:
-                    self.file_size +=l["size"]
-                break
-            cur_size_retries+=1
-            if cur_size_retries > size_retries:
-                print(r)
-                raise BaseException("得不到 size")
+        self.file_size=self.cloud.getFileSize(self.path)
 
-        print("file size ------",self.file_size)
         # try: 
         #     self.file_size = int(r.headers["content-length"]) 
         #     if 'Location' in r.headers and 'issuecdn' in r.headers['Location']:

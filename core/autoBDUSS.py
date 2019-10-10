@@ -6,5 +6,7 @@ def getBDUSS():
         for cookie in cj:
             if cookie.name =='BDUSS':
                 return cookie.value    
+        raise Exception("can not find bduss in Chrome!")
+
     return BDUSS
             
