@@ -29,7 +29,7 @@ class PCS():
             self.BDUSS = getBDUSS()
         self.header={
             'User-Agent': self.user_agent,
-            'cookie':"BDUSS="+   self.BDUSS,
+            'cookie':"BDUSS="+self.BDUSS,
             'User-Agent':self.user_agent,
             'host': "pcs.baidu.com",
             'Accept-Encoding':"gzip"
@@ -51,6 +51,27 @@ class PCS():
         response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
 
 
+    def getFileSize(self,path):
+        r = session.head(self.getRestUrl(path),headers={ **self.getHeader()}) 
+        file_size = 0
+        try: 
+            file_size = int(r.headers["content-length"]) 
+            return file_size
+        except Exception as e : 
+            # try another method
+            file_size = 0
+            size_retries = 5
+            cur_size_retries=0
+            while True:
+                r = self.singleMeta(self.path)
+                if "list" in r:
+                    for l in r["list"]:
+                        file_size +=l["size"]
+                    break
+                cur_size_retries+=1
+                if cur_size_retries > size_retries:
+                    raise BaseException("得不到 size")
+
     def list_files(self,path):
         url = "http://pcs.baidu.com/rest/2.0/pcs/file"
         querystring = {"app_id":self.app_id,"by":"name","limit":"0-2147483647","method":"list","order":"asc","path":path}
@@ -64,7 +85,7 @@ class PCS():
         response = session.get(url, headers=headers, params=querystring)
 
         return response.text
-    def meta2(self,path):
+    def singleMeta(self,path):
         url = "http://pcs.baidu.com/rest/2.0/pcs/file"
 
         querystring = {"app_id":self.app_id,"method":"meta"}
@@ -85,27 +106,49 @@ class PCS():
         r= json.loads(response.text)
 
         return r
-    def meta(self,file_list):
-        url = "http://pan.baidu.com/api/filemetas"
-        data = {'target': json.dumps(file_list)}
-        querystring = {"dlink":"0","blocks":"0","method":"filemetas"}
-        headers = {
-            'host': "pan.baidu.com",
-            'accept': "application/json, text/javascript, text/html, */*; q=0.01",
-            'user-agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36",
-            'accept-language': "en-US,en;q=0.8,zh-CN;q=0.6,zh;q=0.4,zh-TW;q=0.2",
-            'referer': "http://pan.baidu.com/disk/home",
-            'x-requested-with': "XMLHttpRequest",
-            'content-type': "application/x-www-form-urlencoded"
-        }
+#     def meta(self,file_list):
+#         url = "http://pan.baidu.com/api/filemetas"
+#         data = {'target': json.dumps(file_list)}
+#         querystring = {"dlink":"0","blocks":"0","method":"filemetas"}
+#         headers = {
+#             'host': "pan.baidu.com",
+#             'accept': "application/json, text/javascript, text/html, */*; q=0.01",
+#             'user-agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36",
+#             'accept-language': "en-US,en;q=0.8,zh-CN;q=0.6,zh;q=0.4,zh-TW;q=0.2",
+#             'referer': "http://pan.baidu.com/disk/home",
+#             'x-requested-with': "XMLHttpRequest",
+#             'content-type': "application/x-www-form-urlencoded"
+#         }
 
-        try:
-            response = session.post( url,cookies=cj, data=data, headers=headers, params=querystring)
-        except Exception as e:
-            logger.info(e)
-            return '[]' 
+#         try:
+#             response = session.post( url,cookies=cj, data=data, headers=headers, params=querystring)
+#         except Exception as e:
+#             logger.info(e)
+#             return '[]'
+#         return response.text
+
+
+
+
+    def meta(self,file_list):
+#         logger.debug(f'meta: {file_list}')
+
+        url = "http://pcs.baidu.com/rest/2.0/pcs/file"
+        querystring = {"app_id":self.app_id,"method":"meta"}
+        formatPaths = json.dumps(list(map(lambda p : {"path":p}, file_list)))
+        payload = "--a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942\nContent-Disposition: form-data; name=\"param\"\n\n{\"list\":"+formatPaths+"}\n--a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942--\n"
+        headers = {
+            'Host': "pcs.baidu.com",
+            'User-Agent': "netdisk;8.3.1;android-android",
+            'Cookie': "BDUSS="+self.BDUSS,
+            'Content-Type': "multipart/form-data; boundary=a3e249a7d481640c2215fe9bd04ad69c196dd9a116c0354d94e27ddda942",
+            'cache-control': "no-cache"
+            }
+
+        response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
+
         return response.text
-    
+
     def getHeader(self):
         return self.header
 

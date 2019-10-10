@@ -26,172 +26,174 @@ from threading import Lock
 
 
 from cloud.baidu import PCS 
+from cloud.baidu_error import error_map 
 from core.task  import Task
 from core.custom_exceptions import *
 from core.cipher import cipher
 
 encrpted_length = 512
 
-dirReaderDaemon = Pool(1)
+dirReaderDaemon = Pool(30)
 pool = Pool(5)
+attrPool=Pool(5)
 uploadDaemon = Pool(10)
 
 from core.log import funcLog,get_my_logger
 logger = get_my_logger(__name__)
-logger.setLevel(logging.DEBUG)
 
-class NoSuchRowException(Exception):
-    pass
-
-class NoUniqueValueException(Exception):
-    pass
-
-class File():
-    def __init__(self):
-        self.dict = {'bd_fsid':0,
-                    'bd_blocklist':0,
-                    'bd_md5':0,
-                    'st_mode':0,
-                    'st_ino':0,
-                    'st_dev':0,
-                    'st_nlink':0,
-                    'st_uid':0,
-                    'st_gid':0,
-                    'st_size':0,
-                    'st_atime':0,
-                    'st_mtime':0,
-                    'st_ctime':0}
-    def __getitem__(self, item):
-        return self.dict[item]
-    def __setitem__(self, key, value):
-        self.dict[key] = value
-    def __str__(self):
-        return self.dict.__repr__()
-    def __repr__(self):
-        return self.dict.__repr__()
-    def getDict(self):
-        return self.dict
-
-
+fileAttr={          
+        'bd_fsid':0,
+        'bd_blocklist':0,
+        'bd_md5':0,
+        'st_mode':0,
+        'st_ino':0,
+        'st_dev':0,
+        'st_nlink':0,
+        'st_uid':0,
+        'st_gid':0,
+        'st_size':0,
+        'st_atime':0,
+        'st_mtime':0,
+        'st_ctime':0
+        }
 class CloudFS(Operations):
     '''Baidu netdisk filesystem'''
 
     def __init__(self,mainArgs,  *args, **kw):
-        self.buffer =Cache('./cache/buffer')
-        self.dir_buffer = Cache('./cache/dir_buffer')
+        self.buffer =Cache('./cache/buffer-batchmeta')
+        self.dir_buffer =Cache('./cache/dir_buffer-buffer-batchmeta')
+
+        self.attr_requesting = Cache('./cache/attr-requesting')
         self.mainArgs = mainArgs
 
-        self.traversed_folder = {}
+        self.traversed_folder ={}# Cache('./cache/traversed-folder')
         self.disk = PCS(self.mainArgs)
 
         self.createLock = Lock()
+        self.attrLock = Lock()
 
         self.writing_files={}
         self.downloading_files = {}
 
+
+        if mainArgs.debug:
+            logger.setLevel(logging.DEBUG)
+            logger.debug(colored("- debug mode -", 'red'))
+            logger.debug(colored("- cach would not be the same after restart -", 'red'))
+            self.buffer =Cache('./cache/buffer-batchmeta'+str(time.time()))
+            self.dir_buffer =Cache('./cache/dir_buffer-buffer-batchmeta'+str(time.time()))
+            self.traversed_folder = Cache('./cache/traversed-folder'+str(time.time()))
+
         # update all folder  in other thread
-        dirReaderDaemon.submit(self.readdirAsync,"/",100,dirReaderDaemon)  
+        self._readDirAsync("/",3,dirReaderDaemon)
 
 
-    def _add_file_to_buffer(self, path,file_info):
-        foo = File()
+    def _baidu_file_attr_convert(self, path,file_info):
+        foo = fileAttr.copy()
         foo['st_ctime'] = file_info['local_ctime']
         foo['st_mtime'] = file_info['local_mtime']
-        foo['st_mode'] = ( stat.S_IFDIR | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO | stat.S_ISUID | stat.S_ISGID | 0x777) if file_info['isdir'] \
-            else ( stat.S_IFREG | stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO | stat.S_ISUID | stat.S_ISGID | 0x777)
+        foo['st_mode'] =  (stat.S_IFDIR | foo['st_mode'])  if file_info['isdir'] else ( stat.S_IFREG | foo['st_mode'] )
         foo['st_nlink'] = 2 if file_info['isdir'] else 1
         foo['st_size'] = file_info['size']
         self.buffer[path] = foo
 
-
     def _del_file_from_buffer(self,path):
         self.buffer.pop(path)
+
+    def _getRootAttr(self,path):
+        if path in self.buffer:
+            return self.buffer[path]
+
+        logger.debug(f'net root: {path}')
+        jdata = json.loads(self.disk.meta([path]))
+
+        if 'error_code' in jdata:
+            logger.debug(f"error_code:{jdata}")
+#             logger.info(f'{error_map[str(jdata["error_code"])]} args: {path}')
+            self.buffer.set(path, fileAttr.copy(), expire=60)
+            return fileAttr
+            
+        if "list" not in jdata or len(jdata["list"])==0:
+            logger.debug(f"not list :{jdata}")
+            self.buffer.set(path, fileAttr.copy(), expire=60)
+            return fileAttr
+
+        file_info = jdata["list"][0]
+        self._baidu_file_attr_convert(path,file_info)
+        return file_info
 
 
 #     @funcLog
     def getattr(self, path, fh=None):
         if path in self.writing_files:
             return self.writing_files[path]
+
         if path.split("/")[-1].startswith("."):
             raise FuseOSError(errno.ENOENT)
+        
+        # special handle root Attr
+        if path=="/":
+            return self._getRootAttr(path)
+
+        parentDir = os.path.dirname(path)
+        if parentDir not in self.dir_buffer:
+            self._readDir(parentDir,1)
+        return  self.buffer.get(path,fileAttr.copy())
+
+
+        # this path should handled in block mode,otherwise the mount point won`t show in finder disk but only  mount folder
+        if "/" == path:
+            with self.attrLock:
+                return self.buffer.get("/")
             
-        st = None
-        if  path not in self.buffer or self.buffer[path] is None:
-            jdata = json.loads(self.disk.meta([path]))
-       
-            if 'info' not in jdata:
-                raise FuseOSError(errno.ENOENT)
-            if jdata['errno'] != 0:
-                raise FuseOSError(errno.ENOENT)
+        # request for new attr from cloud anyway
+        if path not in self.attr_requesting:
+            if path not in self.buffer:
+                self.attr_requesting.set(path, True, expire=60)
+                attrPool.submit(self._getRootAttr,path)
 
-            file_info = jdata['info'][0]
-            self._add_file_to_buffer(path,file_info)
-            st = self.buffer[path].getDict()
-        else:
-            st= self.buffer[path].getDict()
-
-#         logger.info(f'st: {st}')
-        return st
+        return self.buffer.get(path,fileAttr)
 
 
-    def readdirAsync(self,path,depth=2,threadPool=pool):
-        logger.debug(f'readdirAsync: {path}')
-        try:
-            foo = json.loads(self.disk.list_files(path))
-        except Exception as s:
-            logger.exception(s)
+    def _readDirAsync(self,path,depth,p):
+       p.submit(self._readDir,path,depth,p)
 
-        files = ['.', '..']
-        abs_files = []
-        if 'errno' in foo:
-            logger.error("maybe token is not right, try re login http://pan.baidu.com in Chrome")
-        if "list" not in foo:
-#             logger.info("no list")
-            return 
+    def _readDir(self,path,depth=2,threadPool=pool):
+        if path not in self.traversed_folder and path not in self.dir_buffer:
+            self.traversed_folder.set(path,b'1',expire=60)
+            logger.debug(f'net dir  {depth} - {path} -')
+            try:
+                foo = json.loads(self.disk.list_files(path))
 
+                files = ['.', '..']
+                if 'error_code' in foo:
+                    logger.info(f'{error_map[str(foo["error_code"])]} args: {path}')
+                if "list" not in foo:
+                    logger.info(f"{path}: no list")
+                    return 
 
-        for file in foo['list']:
-            if file['server_filename'].startswith("."):
-                continue
-            files.append(file['server_filename'])
-            abs_files.append(file['path'])
-#             logger.debug(file['path'])
- 
-        file_num = len(abs_files)
-        group = int(math.ceil(file_num / 100.0))
-#         logger.debug(f"group: {group}")
-#         logger.debug(f"abs_files: {abs_files}")
-        for i in range(group):
-            obj = [f for n,f in enumerate(abs_files) if n % group == i] #一组数据
-            while 1:
-                try:
-                    ret = json.loads(self.disk.meta(obj))
-#                     logger.debug(f'{ret}')
-                    break
-                except Exception as e:
-                    logger.info(ret)
-                    logger.exception(e)
-            for file_info in ret['info']:
-#                 logger.debug(file_info)
-                self._add_file_to_buffer(file_info['path'],file_info)
-                if depth >0:
-                    depth-=1
-                    if file_info['isdir']:
-                        if file_info['path'] not in self.traversed_folder:
-                            self.traversed_folder[path] = True
-                            threadPool.submit(self.readdirAsync,file_info['path'],depth,threadPool)  
-        self.dir_buffer[path]=files
+                depth-=1
+                for file in foo['list']:
+                    if file['server_filename'].startswith("."):
+                        continue
+                    files.append(file['server_filename'])
+            #                 logger.debug(f'{file}')
+                    self._baidu_file_attr_convert(file['path'],file)
+                    if depth >0:
+                        if file['isdir']:
+                            self._readDirAsync(file['path'],depth,threadPool)
+#                             self._readDir(file['path'],depth,threadPool)
 
+                self.dir_buffer[path]=files
 
-      
-    
+            except Exception as s:
+                logger.exception(s)
+
 #     @funcLog
     def readdir(self, path, offset):
-#         if path not in self.traversed_folder:
-        self.traversed_folder[path] = True
-        pool.submit(self.readdirAsync,path,2,pool)  
+        logger.debug(f'read dir ')
+        self._readDirAsync(path,1,pool)
         if path  in self.dir_buffer:
-#             logger.info(f'{path},{self.dir_buffer[path]}')
             for r in self.dir_buffer[path]:
                 yield r
         else:
@@ -285,14 +287,20 @@ class CloudFS(Operations):
         self.disk.mkdir(path)
 
  
+    @funcLog
     def create(self, path, mode,fh=None):
+        logger.debug(f'create {path}')
         with self.createLock:
             if path not in self.writing_files:
+                attr =fileAttr.copy()
                 t = time.time()
-                self.writing_files[path] = {
-                'st_atime': t, 'st_ctime': t, 'st_gid': 20, 'st_mode': stat.S_IFREG |stat.S_ISUID | stat.S_ISGID| 0x777, 'st_mtime': t, 'st_nlink': 1, 'st_size': 0, 'st_uid': 502,
-                'uploading_tmp':tempfile.NamedTemporaryFile('wb')
-                }  
+
+                attr['uploading_tmp'] = tempfile.NamedTemporaryFile('wb')
+                attr['st_mode'] =attr['st_mode']  | stat.S_IFREG |stat.S_ISUID | stat.S_ISGID
+
+                self.writing_files[path] = attr
+            else:
+                logger.debug(f'{path} is writing on, wait another turn..')
         return 0
 
     def flush(self, path, fh):
@@ -371,6 +379,7 @@ Don`t change your key while there are already encrpyted file on cloud
     parser.add_argument("-m",'--mount', type=str, required=True, help='local mount point, default is ../mnt2 in x.sh')
     parser.add_argument("-k",'--key', type=str,default="123",required=False, help='specifiy encrpyt key, any length of string, will use it hash code')
     parser.add_argument("-b",'--BDUSS', type=str, required=False, help='By default, BDUSS  will be fetched from Chrome Browser automatically,but you can specifiy it manually')
+    parser.add_argument("-d",'--debug', action='store_true',  help='debug mode')
     logger.info(colored("- fuse 4 cloud driver -", 'red'))
 
     mainArgs = parser.parse_args()
