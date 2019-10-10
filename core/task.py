@@ -126,6 +126,15 @@ class Task(object):
         return [start_idx,end_idx]
 
 
+    def getFileSize(self):
+        r = session.head(self.url,headers={ **self.user_headers}) 
+        try: 
+            self.file_size = int(r.headers["content-length"]) 
+            return self.file_size
+        except Exception as e : 
+            logger.info(e)
+            return    
+        
     def start(self): 
         size_retries = 5
         cur_size_retries=0
