@@ -1,4 +1,17 @@
+
 Blazing fast on Read. 
+<!-- vim-markdown-toc GFM -->
+
+* [feature](#feature)
+* [usage](#usage)
+* [dev](#dev)
+* [todo](#todo)
+* [tips](#tips)
+  * [mpv (ftp on fuse)](#mpv-ftp-on-fuse)
+* [help](#help)
+* [bla](#bla)
+
+<!-- vim-markdown-toc -->
 # feature 
 - Support all disk manipulating with baidu cloud,including read,delete,mkdir,cp,mv,etc, highly optimized for reading. Try opening any file , even a big file. You shall see the magic.
 - Read dir in async mode. (You may see empty dir,but with actual fiels on cloud, that is because some file manager cache dir structure(rancher) when dir data is still on the way back from cloud, you need to get around this by yourself. for example, refresh the dir if the file manager supports. 
@@ -13,19 +26,19 @@ Blazing fast on Read.
 
 
 # usage 
-1. install python 3 
-1. install dependencies `pip install -r requirements.txt`
-1. instal fuselib 
-  1. (windows)  https://github.com/billziss-gh/winfsp
-  2. (mac)    https://osxfuse.github.io/
-1. login in http://pan.baidu.com with **chrome browser** (for the credential to fetch )
-2. open fuse in shell
-  1. mac 
+- install python 3 
+- install dependencies `pip install -r requirements.txt`
+- instal fuselib 
+  - (windows)  https://github.com/billziss-gh/winfsp
+  - (mac)    https://osxfuse.github.io/
+- login in http://pan.baidu.com with **chrome browser** (for the credential to fetch )
+- open fuse in shell
+  -  mac 
     ``` bash
     chmod 777 x.sh
     ./x.sh
     ```
-  2. windows & linux ,  reference x.sh 
+  -  windows & linux ,  reference x.sh 
 
 ![demo](https://github.com/zk4/baiduFuse/blob/master/img/d.gif)
 
@@ -54,7 +67,7 @@ make dist
 - [ ] auto version update, I may change data structure. Cache will not be compatiable 
 - [ ] need to call meta in batch, network is laggy 
 - [ ] when using finder on Mac, handle the finder default request folder specially, make it configruable
-- [x] after add getattrAsync, overwrite is more problematic. tadeoff? 
+- [ ] support LVM for multipal cloud disk. 
 # tips  
 ## mpv (ftp on fuse)
 you can make a ftp server on moutned disk, but there is a catchy when play media file with mpv. see the below.It is not a bug of this project.
@@ -75,3 +88,6 @@ mpv    --cache=no ftp://192.168.1.15:2121/锦绣良缘粤语Gotv/锦绣良缘19.
 python3 x.py --help
 
 ```
+
+# bla
+why is this document written in English,cause writting Chiense in vim is pain in the ass.  

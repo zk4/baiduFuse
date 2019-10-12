@@ -45,9 +45,9 @@ fileAttr={
         'bd_fsid':0,
         'bd_blocklist':0,
         'bd_md5':0,
-        'st_mode':0,
         'st_ino':0,
         'st_dev':0,
+        'st_mode':0,    # this is a trick point where write file and read file conflict
         'st_nlink':0,
         'st_uid':0,
         'st_gid':0,
@@ -60,6 +60,7 @@ class CloudFS(Operations):
     '''Baidu netdisk filesystem'''
 
     def __init__(self,mainArgs,  *args, **kw):
+        logger.info(colored("- fuse 4 cloud driver -", 'red'))
         self.buffer =Cache('./cache/buffer-batchmeta')
         self.dir_buffer =Cache('./cache/dir_buffer-buffer-batchmeta')
 
@@ -91,44 +92,72 @@ class CloudFS(Operations):
         # update all folder  in other thread
         self._readDirAsync("/",mainArgs.preload_level,dirReaderDaemon)
 
+    @staticmethod
+    def add_write_permission(st,  permission = 'u'):
+        """Add `w` (`write`) permission to specified targets."""
+        mode_map = {
+            'u': stat.S_IWUSR,
+            'g': stat.S_IWGRP,
+            'o': stat.S_IWOTH,
+            'a': stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH,
+        }
+        logger.info(f'-------------------{type(stat.S_IWUSR)} ,{type(st["st_mode"])}')
+        for t in permission:
+            st['st_mode'] |= mode_map[t]
+
+        return st
 
     def _baidu_file_attr_convert(self, path,file_info):
         foo = fileAttr.copy()
-        foo['st_ctime'] = file_info['local_ctime']
-        foo['st_mtime'] = file_info['local_mtime']
-        foo['st_mode'] =  (stat.S_IFDIR | foo['st_mode'])  if file_info['isdir'] else ( stat.S_IFREG | foo['st_mode'] )
+        foo['st_ctime'] =file_info['local_ctime'] if 'local_ctime' in file_info  else file_info['ctime'] 
+        foo['st_mtime'] = file_info['local_mtime'] if 'local_mtime' in file_info  else file_info['mtime'] 
+        foo['st_mode'] = 16877 if file_info['isdir'] else 36279
         foo['st_nlink'] = 2 if file_info['isdir'] else 1
-        foo['st_size'] = file_info['size']
+        foo['st_size'] = int(file_info['size']) if 'size' in file_info else 0
         self.buffer[path] = foo
 
     def _del_file_from_buffer(self,path):
         self.buffer.pop(path)
 
-    def _getRootAttr(self,path):
+    def _getRootAttr(self):
+        path ="/"
         if path in self.buffer:
             return self.buffer[path]
 
         logger.debug(f'net root: {path}')
         jdata = json.loads(self.disk.meta([path]))
 
+        f = fileAttr.copy()
+        f["st_mode"]=16877
+        f["st_nlink"]=2
         if 'error_code' in jdata:
             logger.debug(f"error_code:{jdata}")
 #             logger.info(f'{error_map[str(jdata["error_code"])]} args: {path}')
-            self.buffer.set(path, fileAttr.copy(), expire=60)
-            return fileAttr
+            self.buffer.set(path, f, expire=60)
+            return f
             
         if "list" not in jdata or len(jdata["list"])==0:
             logger.debug(f"not list :{jdata}")
-            self.buffer.set(path, fileAttr.copy(), expire=60)
-            return fileAttr
+            self.buffer.set(path, f, expire=60)
+            return f
 
         file_info = jdata["list"][0]
         self._baidu_file_attr_convert(path,file_info)
         return file_info
 
 
-#     @funcLog
+    @funcLog
     def getattr(self, path, fh=None):
+        '''
+        Returns a dictionary with keys identical to the stat C structure of
+        stat(2).
+
+        st_atime, st_mtime and st_ctime should be floats.
+
+        NOTE: There is an incompatibility between Linux and Mac OS X
+        concerning st_nlink of directories. Mac OS X counts all files inside
+        the directory, while Linux counts only the subdirectories.
+        '''
         if path in self.writing_files:
             return self.writing_files[path]
 
@@ -137,14 +166,24 @@ class CloudFS(Operations):
         
         # special handle root Attr
         if path=="/":
-            return self._getRootAttr(path)
+            return self._getRootAttr()
 
         parentDir = os.path.dirname(path)
         if parentDir not in self.dir_buffer:
             self._readDir(parentDir,1)
-        return  self.buffer.get(path,fileAttr.copy())
+
+        if path in self.buffer:
+            return self.buffer[path]
+
+        raise FuseOSError(errno.ENOENT)
 
 
+
+    @funcLog
+    def truncate(self, path, length, fh=None):
+        self.unlink(path)
+        self.create(path,None)
+        self.writing_files[path]["uploading_tmp"].truncate(length)
 
     def _readDirAsync(self,path,depth,p):
        p.submit(self._readDir,path,depth,p)
@@ -152,7 +191,7 @@ class CloudFS(Operations):
     def _readDir(self,path,depth=2,threadPool=pool):
         if path not in self.traversed_folder and path not in self.dir_buffer:
             self.traversed_folder.set(path,b'1',expire=self.mainArgs.cache_timeout)
-            logger.debug(f'net dir  {depth} - {path} -')
+            # logger.debug(f'net dir  {depth} - {path} -')
             try:
                 foo = json.loads(self.disk.list_files(path))
 
@@ -180,9 +219,8 @@ class CloudFS(Operations):
             except Exception as s:
                 logger.exception(s)
 
-#     @funcLog
+    @funcLog
     def readdir(self, path, offset):
-        logger.debug(f'read dir ')
         self._readDirAsync(path,1,pool)
         if path  in self.dir_buffer:
             for r in self.dir_buffer[path]:
@@ -267,15 +305,18 @@ class CloudFS(Operations):
         self.disk.rename(old,new)
         self.updateCahe(old,new)
 
-#     @funcLog
+    @funcLog
     def mkdir(self, path, mode):
+        logger.info(f'making dir {path}')
         directory = path[:path.rfind("/")]
         filename  = path[path.rfind("/")+1:]
         
         cache = self.dir_buffer[directory]
         cache.append(filename)
         self.dir_buffer[directory]=cache
-        self.disk.mkdir(path)
+        r = json.loads(self.disk.mkdir(path))
+        print(r)
+        self._baidu_file_attr_convert(path,r)
 
  
     @funcLog
@@ -305,8 +346,12 @@ class CloudFS(Operations):
         with self.createLock:
             if path in self.writing_files:
                 uploading_tmp=self.writing_files[path]['uploading_tmp']
-                self.disk.upload(uploading_tmp.name,path)
+                r =json.loads(self.disk.upload(uploading_tmp.name,path))
+#                 logger.info(f'================================={r}')
+
                 self.writing_files[path]['uploading_tmp'].close()
+#                 if path in self.buffer:
+#                     del self.buffer[path]
 
                 if path in self.writing_files:
                     del self.writing_files[path]
@@ -314,6 +359,19 @@ class CloudFS(Operations):
                 # why ? prevent accidently read file when uploading still in progress
                 if path in self.downloading_files:
                     del self.downloading_files[path]
+                
+
+		# update file 
+                self._baidu_file_attr_convert(path,r)
+
+                # update parent dir
+                parentDir = os.path.dirname(path)
+                filename  = path[path.rfind("/")+1:]
+
+                if  parentDir in self.dir_buffer:
+                    self.dir_buffer[parentDir].append(filename)
+                  
+
                 
                 print("released",path)
                 return  
@@ -353,12 +411,19 @@ class CloudFS(Operations):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
              formatter_class=argparse.RawDescriptionHelpFormatter,
-             description='''
-Ex: 
-    # chmod 777 x.sh  &&  ./x.sh 
+             description=f'''
+
+{ colored("There are two entries", 'red') }
+x.py  # this is the main entry, for developer, you know what you are doing. 
+
+  python3 x.py --help
+
+x.sh  # this is the one for noobie. Just use it. Don`t ask why.
 
 
-Encrption:
+  chmod 777 x.sh  &&  ./x.sh 
+
+{ colored("Encrption", 'red') }
 mountDisk --> fuse (encrpt) --> cloud 
 mountDisk <-- fuse (decrpt) <-- cloud
 
@@ -373,7 +438,6 @@ Don`t change your key while there are already encrpyted file on cloud
     parser.add_argument("-pl",'--preload_level', type=int, required=False, default=3, help='how many dir level do you wnat to preload')
     parser.add_argument("-d",'--debug', action='store_true',  help='debug mode')
     parser.add_argument("-ct",'--cache_timeout', type=int, required=False, default=60, help='how many seconds will folder structure cache timeout')
-    logger.info(colored("- fuse 4 cloud driver -", 'red'))
 
     mainArgs = parser.parse_args()
 

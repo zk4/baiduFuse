@@ -218,6 +218,7 @@ class PCS():
             'cookie': "BDUSS="+self.BDUSS
             }
         response = requests.request("POST", url,  headers=headers, params=querystring)
+        return response.text
 
     def quota(self):
         url = "http://pcs.baidu.com/rest/2.0/pcs/quota"
