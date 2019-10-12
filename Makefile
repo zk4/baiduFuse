@@ -2,7 +2,7 @@
 
 
 test:
-	watchexec -rce py  'sleep 2 && pytest -s'
+	watchexec -rce py  'sleep 2 && pytest -srpP'
 
 dev: 
 	watchexec -rce py "./x.sh --debug" 
