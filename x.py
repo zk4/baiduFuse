@@ -66,7 +66,7 @@ class CloudFS(Operations):
         self.attr_requesting = Cache('./cache/attr-requesting')
         self.mainArgs = mainArgs
 
-        self.traversed_folder ={}# Cache('./cache/traversed-folder')
+        self.traversed_folder = Cache('./cache/traversed-folder')
         self.disk = PCS(self.mainArgs)
 
         self.createLock = Lock()
@@ -75,6 +75,7 @@ class CloudFS(Operations):
         self.writing_files={}
         self.downloading_files = {}
 
+        logger.info(f'mainArgs:{mainArgs}')
 
         if mainArgs.debug:
             logger.setLevel(logging.DEBUG)
@@ -83,9 +84,12 @@ class CloudFS(Operations):
             self.buffer =Cache('./cache/buffer-batchmeta'+str(time.time()))
             self.dir_buffer =Cache('./cache/dir_buffer-buffer-batchmeta'+str(time.time()))
             self.traversed_folder = Cache('./cache/traversed-folder'+str(time.time()))
+        else:
+            logger.setLevel(logging.INFO)
+
 
         # update all folder  in other thread
-        self._readDirAsync("/",3,dirReaderDaemon)
+        self._readDirAsync("/",mainArgs.preload_level,dirReaderDaemon)
 
 
     def _baidu_file_attr_convert(self, path,file_info):
@@ -141,26 +145,13 @@ class CloudFS(Operations):
         return  self.buffer.get(path,fileAttr.copy())
 
 
-        # this path should handled in block mode,otherwise the mount point won`t show in finder disk but only  mount folder
-        if "/" == path:
-            with self.attrLock:
-                return self.buffer.get("/")
-            
-        # request for new attr from cloud anyway
-        if path not in self.attr_requesting:
-            if path not in self.buffer:
-                self.attr_requesting.set(path, True, expire=60)
-                attrPool.submit(self._getRootAttr,path)
-
-        return self.buffer.get(path,fileAttr)
-
 
     def _readDirAsync(self,path,depth,p):
        p.submit(self._readDir,path,depth,p)
 
     def _readDir(self,path,depth=2,threadPool=pool):
         if path not in self.traversed_folder and path not in self.dir_buffer:
-            self.traversed_folder.set(path,b'1',expire=60)
+            self.traversed_folder.set(path,b'1',expire=self.mainArgs.cache_timeout)
             logger.debug(f'net dir  {depth} - {path} -')
             try:
                 foo = json.loads(self.disk.list_files(path))
@@ -379,7 +370,9 @@ Don`t change your key while there are already encrpyted file on cloud
     parser.add_argument("-m",'--mount', type=str, required=True, help='local mount point, default is ../mnt2 in x.sh')
     parser.add_argument("-k",'--key', type=str,default="123",required=False, help='specifiy encrpyt key, any length of string, will use it hash code')
     parser.add_argument("-b",'--BDUSS', type=str, required=False, help='By default, BDUSS  will be fetched from Chrome Browser automatically,but you can specifiy it manually')
+    parser.add_argument("-pl",'--preload_level', type=int, required=False, default=3, help='how many dir level do you wnat to preload')
     parser.add_argument("-d",'--debug', action='store_true',  help='debug mode')
+    parser.add_argument("-ct",'--cache_timeout', type=int, required=False, default=60, help='how many seconds will folder structure cache timeout')
     logger.info(colored("- fuse 4 cloud driver -", 'red'))
 
     mainArgs = parser.parse_args()

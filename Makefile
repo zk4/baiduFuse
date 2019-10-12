@@ -7,10 +7,11 @@ test:
 dev: 
 	watchexec -rce py "./x.sh --debug" 
 	
-y: 
-	watchexec -rce py "./y.sh"
+wun: 
+	watchexec -rce py "./x.sh" 
+
 run: 
-	./x.sh
+	"./x.sh" 
 
 requirements:
 	pipreqs --force . 
