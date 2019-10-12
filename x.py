@@ -60,6 +60,7 @@ class CloudFS(Operations):
     '''Baidu netdisk filesystem'''
 
     def __init__(self,mainArgs,  *args, **kw):
+        logger.info(colored("- fuse 4 cloud driver -", 'red'))
         self.buffer =Cache('./cache/buffer-batchmeta')
         self.dir_buffer =Cache('./cache/dir_buffer-buffer-batchmeta')
 
@@ -353,12 +354,19 @@ class CloudFS(Operations):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
              formatter_class=argparse.RawDescriptionHelpFormatter,
-             description='''
-Ex: 
-    # chmod 777 x.sh  &&  ./x.sh 
+             description=f'''
+
+{ colored("There are two entries", 'red') }
+x.py  # this is the main entry, for developer, you know what you are doing. 
+
+  python3 x.py --help
+
+x.sh  # this is the one for noobie. Just use it. Don`t ask why.
 
 
-Encrption:
+  chmod 777 x.sh  &&  ./x.sh 
+
+{ colored("Encrption", 'red') }
 mountDisk --> fuse (encrpt) --> cloud 
 mountDisk <-- fuse (decrpt) <-- cloud
 
@@ -373,7 +381,6 @@ Don`t change your key while there are already encrpyted file on cloud
     parser.add_argument("-pl",'--preload_level', type=int, required=False, default=3, help='how many dir level do you wnat to preload')
     parser.add_argument("-d",'--debug', action='store_true',  help='debug mode')
     parser.add_argument("-ct",'--cache_timeout', type=int, required=False, default=60, help='how many seconds will folder structure cache timeout')
-    logger.info(colored("- fuse 4 cloud driver -", 'red'))
 
     mainArgs = parser.parse_args()
 
