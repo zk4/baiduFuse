@@ -19,7 +19,7 @@ logger.setLevel(logging.DEBUG)
 def funcLog(func):
     def wrapper(*args, **kw):
         ret= func(*args, **kw)
-        # logger.debug(f'{func.__name__},{args[1]} => {ret}')
+#         logger.debug(f'{func.__name__},{args[1]} => {ret}')
 #         logger.debug(f'{func.__name__},{args[1]} => {ret}')
         return ret 
     return wrapper

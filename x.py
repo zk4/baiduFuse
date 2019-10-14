@@ -266,56 +266,88 @@ class CloudFS(Operations):
             return data
             
         raise FuseOSError(errno.EIO)
-    def updateCahe(self,old, new):
-        directory = old[:old.rfind("/")]
-        filename  = old[old.rfind("/")+1:]
-        if len(directory) == 0:
-            directory="/"
+    def updateCache(self,path,newValue):
+        '''
+        add     updateCache(path,value)
+        delete  updateCache(path,None)
+        udpate  updateCache(path,value)
+        
+        '''
+        pass
+
+    def updateCacheKeyOnly(self,old, new):
+        '''
+        delete     updateCacheKeyOnly(old,None)
+        add/update updateCacheKeyOnly(old,new) 
+        '''
+        old_parent_dir   = os.path.dirname(old)
+        old_name  = os.path.basename(old)
         if not new:
-            oldCache = self.dir_buffer[directory]
-            if filename in oldCache:
-                oldCache.remove(filename)
-                self.dir_buffer[directory] = oldCache
-            if old in self.buffer:
-                self.buffer.pop(old)
+            oldCache = self.dir_buffer.get(old_parent_dir)
+            # remove 
+            if oldCache:
+                if old_name in oldCache:
+                    oldCache.remove(old_name)
+                    self.dir_buffer[old_parent_dir] = oldCache
+                if old in self.buffer:
+                    self.buffer.pop(old)
+            else:
+                pass
         else:
-            oldCache = self.dir_buffer[directory]
-            if filename in oldCache:
-                oldCache.remove(filename)
+            oldCache = self.dir_buffer[old_parent_dir]
+            if old_name in oldCache:
+                oldCache.remove(old_name)
                 newfilename  = new[new.rfind("/")+1:]
                 oldCache.append(newfilename)
-                self.dir_buffer[directory]=oldCache
+                self.dir_buffer[old_parent_dir]=oldCache
             if old in self.buffer:
                 old_info = self.buffer.pop(old)
                 self.buffer[new] = old_info
 
     def unlink(self, path):
+        ''' 
+        will only delete file
+        '''
+        
         self.disk.delete([path])
-        self.updateCahe(path,None)
+        self.updateCacheKeyOnly(path,None)
 
+    def rmdir(self, path):
+        '''
+        will only delete directory
+        '''
+
+        self.disk.delete([path])
+        self.updateCacheKeyOnly(path,None)
     
     def access(self, path, amode):
         return 0
 
-    def rmdir(self, path):
-        self.disk.delete([path])
-        self.updateCahe(path,None)
 
     def rename(self, old, new):
+        '''
+        will effect dir and file
+        '''
+        logger.info(f'rename {old}, {new}')
         self.disk.rename(old,new)
-        self.updateCahe(old,new)
+        self.updateCacheKeyOnly(old,new)
 
     @funcLog
     def mkdir(self, path, mode):
         logger.info(f'making dir {path}')
+        
+        r = json.loads(self.disk.mkdir(path))
+
         directory = path[:path.rfind("/")]
         filename  = path[path.rfind("/")+1:]
-        
-        cache = self.dir_buffer[directory]
-        cache.append(filename)
+
+        cache = None
+        if directory in self.dir_buffer:
+            cache = self.dir_buffer[directory]
+            cache.append(filename)
         self.dir_buffer[directory]=cache
-        r = json.loads(self.disk.mkdir(path))
-        print(r)
+
+        
         self._baidu_file_attr_convert(path,r)
 
  

@@ -29,8 +29,9 @@ Blazing fast on Read.
 - install python 3 
 - install dependencies `pip install -r requirements.txt`
 - instal fuselib 
-  - (windows)  https://github.com/billziss-gh/winfsp
-  - (mac)    https://osxfuse.github.io/
+  - (Windows)  https://github.com/billziss-gh/winfsp
+  - (Mac)    https://osxfuse.github.io/
+  - (Linux)  https://github.com/libfuse/libfuse
 - login in http://pan.baidu.com with **chrome browser** (for the credential to fetch )
 - open fuse in shell
   -  mac 

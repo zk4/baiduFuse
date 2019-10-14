@@ -1,8 +1,14 @@
 import os
 import time
 
+key = "../mnt2/testkey.txt"
+def test_is_mounted():
+    assert os.path.exists(key)
+    if not os.path.exists("../mnt2/test"):
+        os.makedirs("../mnt2/test")
+
 def test_file_write_and_rename_and_rm():
-    testFile = "/Users/zk/git/pythonPrj/mnt2/test/"+str(int(time.time()))+".txt"
+    testFile = "../mnt2/test/"+str(int(time.time()))+".txt"
     with open(testFile,"w+") as f:
         f.write('2')
 
@@ -17,15 +23,13 @@ def test_file_write_and_rename_and_rm():
     os.remove(testFile)
 
     assert not os.path.exists(testFile)
-key = "/Users/zk/git/pythonPrj/mnt2/testkey.txt"
-def test_key_exists():
-    assert os.path.exists(key)
+
 def test_key_content():
     with open(key,"r") as f:
         assert f.read() =="123456\n\n"
 
 def test_file_write_and_read_and_rm():
-    testFile = "/Users/zk/git/pythonPrj/mnt2/test/"+str(int(time.time()))+".txt"
+    testFile = "../mnt2/test/"+str(int(time.time()))+".txt"
     with open(testFile,"w+") as f:
         f.write('2')
 
@@ -39,7 +43,7 @@ def test_file_write_and_read_and_rm():
     assert not os.path.exists(testFile)
 
 def test_dir_mk_and_rm():
-    testDir = "/Users/zk/git/pythonPrj/mnt2/test/"+str(int(time.time()))+"/"
+    testDir = "../mnt2/test/"+str(int(time.time()))+"/"
     os.makedirs(testDir)
 
     assert os.path.exists(testDir)
@@ -47,7 +51,7 @@ def test_dir_mk_and_rm():
 
 # not support yet
 def test_over_write():
-    testFile = "/Users/zk/git/pythonPrj/mnt2/test/"+str(int(time.time()))+".txt"
+    testFile = "../mnt2/test/"+str(int(time.time()))+".txt"
     with open(testFile,"w+") as f:
         f.write('10')
 
