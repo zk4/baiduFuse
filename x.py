@@ -323,7 +323,6 @@ class CloudFS(Operations):
     def access(self, path, amode):
         return 0
 
-
     def rename(self, old, new):
         '''
         will effect dir and file
