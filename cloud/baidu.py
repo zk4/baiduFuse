@@ -231,4 +231,5 @@ class PCS():
             }
 
         response = requests.request("GET", url, headers=headers, params=querystring)
+        return response.text
 

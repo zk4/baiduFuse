@@ -78,6 +78,13 @@ class CloudFS(Operations):
 
         logger.info(f'mainArgs:{mainArgs}')
 
+        q = json.loads(self.disk.quota())
+
+        # only request once 
+        self.total_size =q['quota']
+        self.used =q['used']
+        self.avail =self.total_size -self.used
+
         if mainArgs.debug:
             logger.setLevel(logging.DEBUG)
             logger.debug(colored("- debug mode -", 'red'))
@@ -461,11 +468,13 @@ class CloudFS(Operations):
         pass
 
     def statfs(self, path):
+       
+
         # TODO read from cloud disk 
-        return {'f_bavail': int(85533433401/4096), 'f_bfree': int(85533433401/4096),  # 相同的值  block
+        return {'f_bavail': int((self.avail)/4096), 'f_bfree': int((self.avail)/4096),  # 相同的值  block
                 'f_favail': 4290675908, 'f_ffree': 4290675908,  # 相同的值  node
                 'f_bsize': 104857,  # perferd value 
-        'f_blocks': int(5611374772224/8),  'f_files': 4294967279, 'f_flag': 0, 'f_frsize': 4096, 'f_namemax': 255}
+        'f_blocks': int(self.total_size/8),  'f_files': 4294967279, 'f_flag': 0, 'f_frsize': 4096, 'f_namemax': 255}
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
