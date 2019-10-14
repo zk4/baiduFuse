@@ -109,12 +109,16 @@ class CloudFS(Operations):
 
     def _baidu_file_attr_convert(self, path,file_info):
         foo = fileAttr.copy()
-        foo['st_ctime'] =file_info['local_ctime'] if 'local_ctime' in file_info  else file_info['ctime'] 
-        foo['st_mtime'] = file_info['local_mtime'] if 'local_mtime' in file_info  else file_info['mtime'] 
-        foo['st_mode'] = 16877 if file_info['isdir'] else 36279
-        foo['st_nlink'] = 2 if file_info['isdir'] else 1
-        foo['st_size'] = int(file_info['size']) if 'size' in file_info else 0
-        self.buffer[path] = foo
+        try:
+            foo['st_ctime'] =file_info['local_ctime'] if 'local_ctime' in file_info  else file_info['ctime'] 
+            foo['st_mtime'] = file_info['local_mtime'] if 'local_mtime' in file_info  else file_info['mtime'] 
+            foo['st_mode'] = 16877 if file_info['isdir'] else 36279
+            foo['st_nlink'] = 2 if file_info['isdir'] else 1
+            foo['st_size'] = int(file_info['size']) if 'size' in file_info else 0
+            self.buffer[path] = foo
+        except Exception as e:
+            logger.debug(f'======================')
+            logger.debug(f'add buffer error {e},{path}:{file_info}')
 
     def _del_file_from_buffer(self,path):
         self.buffer.pop(path)
@@ -130,14 +134,14 @@ class CloudFS(Operations):
         f = fileAttr.copy()
         f["st_mode"]=16877
         f["st_nlink"]=2
-        if 'error_code' in jdata:
+        if 'error_code' in jdata and jdata["error_code"]!=0:
             logger.debug(f"error_code:{jdata}")
 #             logger.info(f'{error_map[str(jdata["error_code"])]} args: {path}')
             self.buffer.set(path, f, expire=60)
             return f
             
         if "list" not in jdata or len(jdata["list"])==0:
-            logger.debug(f"not list :{jdata}")
+            logger.debug(f"{path} not list :{jdata}")
             self.buffer.set(path, f, expire=60)
             return f
 
@@ -196,10 +200,9 @@ class CloudFS(Operations):
                 foo = json.loads(self.disk.list_files(path))
 
                 files = ['.', '..']
-                if 'error_code' in foo:
+                if 'error_code' in foo and foo["error_code"]!=0:
                     logger.info(f'{error_map[str(foo["error_code"])]} args: {path}')
                 if "list" not in foo:
-                    logger.info(f"{path}: no list")
                     return 
 
                 depth-=1
@@ -336,6 +339,12 @@ class CloudFS(Operations):
         logger.info(f'making dir {path}')
         
         r = json.loads(self.disk.mkdir(path))
+        
+        if 'error_code' in r:
+            logger.info(f'{r}')
+            logger.info(f'{error_map[str(r["error_code"])]} args: {path}, response:{r}')
+            return 
+
 
         directory = path[:path.rfind("/")]
         filename  = path[path.rfind("/")+1:]
