@@ -85,12 +85,12 @@ class CloudFS(Operations):
             self.buffer =Cache('./cache/buffer-batchmeta'+str(time.time()))
             self.dir_buffer =Cache('./cache/dir_buffer-buffer-batchmeta'+str(time.time()))
             self.traversed_folder = Cache('./cache/traversed-folder'+str(time.time()))
+            self._readDirAsync("/",2,dirReaderDaemon)
         else:
             logger.setLevel(logging.INFO)
 
-
-        # update all folder  in other thread
-        self._readDirAsync("/",mainArgs.preload_level,dirReaderDaemon)
+            # update all folder  in other thread
+            self._readDirAsync("/",mainArgs.preload_level,dirReaderDaemon)
 
     @staticmethod
     def add_write_permission(st,  permission = 'u'):
@@ -189,13 +189,14 @@ class CloudFS(Operations):
         self.create(path,None)
         self.writing_files[path]["uploading_tmp"].truncate(length)
 
+    
     def _readDirAsync(self,path,depth,p):
        p.submit(self._readDir,path,depth,p)
 
     def _readDir(self,path,depth=2,threadPool=pool):
-        if path not in self.traversed_folder and path not in self.dir_buffer:
+        if path not in self.traversed_folder :
             self.traversed_folder.set(path,b'1',expire=self.mainArgs.cache_timeout)
-            # logger.debug(f'net dir  {depth} - {path} -')
+            logger.debug(f'net dir {depth} - {path} ')
             try:
                 foo = json.loads(self.disk.list_files(path))
 
@@ -219,13 +220,14 @@ class CloudFS(Operations):
 
                 self.dir_buffer[path]=files
 
+
             except Exception as s:
                 logger.exception(s)
 
     @funcLog
     def readdir(self, path, offset):
         self._readDirAsync(path,1,pool)
-        if path  in self.dir_buffer:
+        if path in self.dir_buffer:
             for r in self.dir_buffer[path]:
                 yield r
         else:
@@ -283,34 +285,48 @@ class CloudFS(Operations):
         delete     updateCacheKeyOnly(old,None)
         add/update updateCacheKeyOnly(old,new) 
         '''
-        old_parent_dir   = os.path.dirname(old)
-        old_name  = os.path.basename(old)
-        if not new:
-            oldCache = self.dir_buffer.get(old_parent_dir)
-            # remove 
-            if oldCache:
-                if old_name in oldCache:
-                    oldCache.remove(old_name)
-                    self.dir_buffer[old_parent_dir] = oldCache
-                if old in self.buffer:
-                    self.buffer.pop(old)
+        try:
+            old_parent_dir   = os.path.dirname(old)
+            old_name  = os.path.basename(old)
+            if not new:
+                oldCache = self.dir_buffer.get(old_parent_dir)
+                # remove 
+                if oldCache:
+                    if old_name in oldCache:
+                        oldCache.remove(old_name)
+                        self.dir_buffer[old_parent_dir] = oldCache
+                    if old in self.buffer:
+                        self.buffer.pop(old)
+                else:
+                    pass
             else:
-                pass
-        else:
-            oldCache = self.dir_buffer[old_parent_dir]
-            if old_name in oldCache:
-                oldCache.remove(old_name)
-                newfilename  = new[new.rfind("/")+1:]
-                oldCache.append(newfilename)
-                self.dir_buffer[old_parent_dir]=oldCache
-            if old in self.buffer:
-                old_info = self.buffer.pop(old)
-                self.buffer[new] = old_info
+                print("updateCache",old,new)
+                oldCache = self.dir_buffer[old_parent_dir]
+                new_parent_dir   = os.path.dirname(new)
+                if old_name in oldCache:
+                    # dir old remove 
+                    oldCache.remove(old_name)
+                    self.dir_buffer[old_parent_dir]=oldCache
+                    # dir new add
+                    newfilename  = new[new.rfind("/")+1:]
+                    newCache=self.dir_buffer.get( new_parent_dir,[] )
+                    newCache.append(newfilename)
+                    self.dir_buffer[new_parent_dir]=newCache
+
+                if old in self.buffer:
+                    old_info = self.buffer.pop(old)
+                    self.buffer[new] = old_info
+        except Exception as e :
+            logger.info(e)
+
+    def updateDir(self,old,new):
+        pass
 
     def unlink(self, path):
         ''' 
         will only delete file
         '''
+        print("unlink .....................")
         
         self.disk.delete([path])
         self.updateCacheKeyOnly(path,None)
@@ -387,7 +403,7 @@ class CloudFS(Operations):
             if path in self.writing_files:
                 uploading_tmp=self.writing_files[path]['uploading_tmp']
                 r =json.loads(self.disk.upload(uploading_tmp.name,path))
-#                 logger.info(f'================================={r}')
+                logger.info(f'================================={r}')
 
                 self.writing_files[path]['uploading_tmp'].close()
 #                 if path in self.buffer:
@@ -409,7 +425,10 @@ class CloudFS(Operations):
                 filename  = path[path.rfind("/")+1:]
 
                 if  parentDir in self.dir_buffer:
-                    self.dir_buffer[parentDir].append(filename)
+                    parentDirCache = self.dir_buffer[parentDir]
+                    parentDirCache.append(filename)
+                    self.dir_buffer[parentDir]=parentDirCache
+                    logger.info(f'{self.dir_buffer[parentDir]}')
                   
 
                 
@@ -465,8 +484,8 @@ x.sh  # this is the one for noobie. Just use it. Don`t ask why.
 
 { colored("Encrption", 'red') }
 mountDisk --> fuse (encrpt) --> cloud 
-mountDisk <-- fuse (decrpt) <-- cloud
 
+mountDisk <-- fuse (decrpt) <-- cloud
 Don`t change your key while there are already encrpyted file on cloud
 
     
@@ -475,7 +494,7 @@ Don`t change your key while there are already encrpyted file on cloud
     parser.add_argument("-m",'--mount', type=str, required=True, help='local mount point, default is ../mnt2 in x.sh')
     parser.add_argument("-k",'--key', type=str,default="123",required=False, help='specifiy encrpyt key, any length of string, will use it hash code')
     parser.add_argument("-b",'--BDUSS', type=str, required=False, help='By default, BDUSS  will be fetched from Chrome Browser automatically,but you can specifiy it manually')
-    parser.add_argument("-pl",'--preload_level', type=int, required=False, default=3, help='how many dir level do you wnat to preload')
+    parser.add_argument("-pl",'--preload_level', type=int, required=False, default=10, help='how many dir level do you wnat to preload')
     parser.add_argument("-d",'--debug', action='store_true',  help='debug mode')
     parser.add_argument("-ct",'--cache_timeout', type=int, required=False, default=60, help='how many seconds will folder structure cache timeout')
 
