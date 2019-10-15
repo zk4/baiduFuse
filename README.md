@@ -59,15 +59,13 @@ make dist
 ```
 # todo 
 - [ ] improvment!!: reduce local disk size,( maybe download in memory)
-- [ ] improvment: display true disk meta data
 - [ ] improvment: when write with finder on mac, a lot of garbage file occurs with `.` or `_`  in the name prefix 
 - [ ] make encrpytion verisoned.
 - [ ] add expried time to cache?
-- [ ] improvment!! overwrite file. 
 - [ ] encrpyt file already on cloud
 - [ ] auto version update, I may change data structure. Cache will not be compatiable 
-- [ ] need to call meta in batch, network is laggy 
 - [ ] when using finder on Mac, handle the finder default request folder specially, make it configruable
+- [ ] support fast move
 - [ ] support LVM for multipal cloud disk. 
 # tips  
 ## mpv (ftp on fuse)
