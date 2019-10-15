@@ -81,8 +81,15 @@ class CloudFS(Operations):
         q = json.loads(self.disk.quota())
 
         # only request once 
-        self.total_size =q['quota']
-        self.used =q['used']
+        try:
+            self.total_size =q['quota'] 
+            self.used =q['used']
+        except Exception as e:
+            self.total_size =100000000000
+            self.used =0
+            logger.exception(e)
+            logger.debug(f'con`t load quota api, fall back to default')
+
         self.avail =self.total_size -self.used
 
         if mainArgs.debug:
