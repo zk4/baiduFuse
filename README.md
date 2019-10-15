@@ -34,12 +34,18 @@ Blazing fast on Read.
   - (Linux)  https://github.com/libfuse/libfuse
 - login in http://pan.baidu.com with **chrome browser** (for the credential to fetch )
 - open fuse in shell
-  -  mac 
+  -  mac  - stable
     ``` bash
     chmod 777 x.sh
     ./x.sh
     ```
-  -  windows & linux ,  reference x.sh 
+
+
+
+  -  windows - still buggy. Get BDUSS from Chrome may encounter permission problem, you can mannually set it . mmap does not work. Some PR  on this would be great help.
+  ``` bat
+  python x.py -m 'mnt2' -k 123 -d -b  <BDUSS>
+  ```
 
 ![demo](https://github.com/zk4/baiduFuse/blob/master/img/d.gif)
 

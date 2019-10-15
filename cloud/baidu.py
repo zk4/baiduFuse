@@ -5,7 +5,6 @@ import logging
 from core.log import funcLog,get_my_logger
 import requests
 import json
-from core.autoBDUSS import getBDUSS,cj
 from core.progress_requests import BufferReader, progress
 import urllib.parse
 
@@ -26,6 +25,7 @@ class PCS():
         if self.mainArgs.BDUSS:
             self.BDUSS = self.mainArgs.BDUSS
         else:
+            from core.autoBDUSS import getBDUSS,cj   
             self.BDUSS = getBDUSS()
         self.header={
             'User-Agent': self.user_agent,
