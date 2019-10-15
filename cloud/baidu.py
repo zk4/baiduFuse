@@ -25,7 +25,7 @@ class PCS():
         if self.mainArgs.BDUSS:
             self.BDUSS = self.mainArgs.BDUSS
         else:
-            from core.autoBDUSS import getBDUSS,cj   
+            from cloud.autoBDUSS import getBDUSS,cj   
             self.BDUSS = getBDUSS()
         self.header={
             'User-Agent': self.user_agent,
