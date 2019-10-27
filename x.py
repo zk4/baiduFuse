@@ -70,7 +70,6 @@ class CloudFS(Operations):
         self.disk = PCS()
 
         self.createLock = Lock()
-        self.attrLock = Lock()
 
         self.writing_files={}
         self.downloading_files = {}
@@ -215,7 +214,8 @@ class CloudFS(Operations):
 
                 files = ['.', '..']
                 if 'error_code' in foo and foo["error_code"]!=0:
-                    logger.info(f'{error_map[str(foo["error_code"])]} args: {path}')
+#                     logger.info(f'{error_map[str(foo["error_code"])]} args: {path}')
+                    logger.info(f'{foo}')
                 if "list" not in foo:
                     return 
 
@@ -410,48 +410,48 @@ class CloudFS(Operations):
         return 0
 
     def flush(self, path, fh):
-        with self.createLock:
-            if path in self.writing_files:
-                self.writing_files[path]["uploading_tmp"].flush()
+#         with self.createLock:
+        if path in self.writing_files:
+            self.writing_files[path]["uploading_tmp"].flush()
         return 0
 
    
     def release(self, path, fh):
-        with self.createLock:
-            if path in self.writing_files:
-                uploading_tmp=self.writing_files[path]['uploading_tmp']
-                r =json.loads(self.disk.upload(uploading_tmp.name,path))
-                logger.info(f'================================={r}')
+#         with self.createLock:
+        if path in self.writing_files:
+            uploading_tmp=self.writing_files[path]['uploading_tmp']
+            r =json.loads(self.disk.upload(uploading_tmp.name,path))
+            logger.info(f'================================={r}')
 
-                self.writing_files[path]['uploading_tmp'].close()
+            self.writing_files[path]['uploading_tmp'].close()
 #                 if path in self.buffer:
 #                     del self.buffer[path]
 
-                if path in self.writing_files:
-                    del self.writing_files[path]
+            if path in self.writing_files:
+                del self.writing_files[path]
 
-                # why ? prevent accidently read file when uploading still in progress
-                if path in self.downloading_files:
-                    del self.downloading_files[path]
-                
+            # why ? prevent accidently read file when uploading still in progress
+            if path in self.downloading_files:
+                del self.downloading_files[path]
+            
 
-		# update file 
-                self._baidu_file_attr_convert(path,r)
+            # update file 
+            self._baidu_file_attr_convert(path,r)
 
-                # update parent dir
-                parentDir = os.path.dirname(path)
-                filename  = path[path.rfind("/")+1:]
+            # update parent dir
+            parentDir = os.path.dirname(path)
+            filename  = path[path.rfind("/")+1:]
 
-                if  parentDir in self.dir_buffer:
-                    parentDirCache = self.dir_buffer[parentDir]
-                    parentDirCache.append(filename)
-                    self.dir_buffer[parentDir]=parentDirCache
-                    logger.info(f'{self.dir_buffer[parentDir]}')
-                  
+            if  parentDir in self.dir_buffer:
+                parentDirCache = self.dir_buffer[parentDir]
+                parentDirCache.append(filename)
+                self.dir_buffer[parentDir]=parentDirCache
+                logger.info(f'{self.dir_buffer[parentDir]}')
+              
 
-                
-                print("released",path)
-                return  
+            
+            print("released",path)
+            return  
         # method does not have thread race problem, release by one thread only
         if path in self.downloading_files:
 #             self.downloading_files[path].terminate()

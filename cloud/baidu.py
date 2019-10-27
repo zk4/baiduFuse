@@ -148,7 +148,7 @@ class PCS():
         app_id="250528"
         user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36"
         header={
-            'User-Agent': user_agent,
+          
             'cookie':"BDUSS="+self.BDUSS,
             'User-Agent':user_agent,
             'host': "pcs.baidu.com",
@@ -211,7 +211,7 @@ class PCS():
         return response.text 
 
     def getRestUrl(self,url):
-        return "https://pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id="+self.app_id+"&path="+urllib.parse.quote(url,safe="")
+        return "https://pcs.baidu.com/rest/2.0/pcs/file?method=download&app_id="+"250528"+"&path="+urllib.parse.quote(url,safe="")
 
     def mkdir(self,path):
         url = "http://pcs.baidu.com/rest/2.0/pcs/file"
