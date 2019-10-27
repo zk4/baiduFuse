@@ -29,8 +29,8 @@ class Task(object):
     @staticmethod
     def createHelperThread(startIdx,endIdx,task):
         isPreviewAble = task.isPreviewAble
-#         preDownloadPart = 30 if isPreviewAble else 30
-        for i in range(startIdx,endIdx):
+        preDownloadPart = 30 if isPreviewAble else 30
+        for i in range(startIdx,endIdx+preDownloadPart):
             if i >= len(task.block_infos):
                 break
 
@@ -114,13 +114,6 @@ class Task(object):
                         return self.mmap[offset:offset+size]
 
                 q.put((Task.createHelperThread,[r[0],r[1],self],1))
-                print("qsize------------------",q.qsize())
-                if q.qsize()<20:
-                    for i  in range(r[1],len(self.block_infos)):
-                        if self.block_infos[i]['status'] is None:
-                            q.put((Task.createHelperThread,[i,i+1,self],2))
-                            if q.qsize()>=20:
-                                break
 
                 end = time.time()
                 # no response for 10 secs, just drop it 
@@ -169,13 +162,15 @@ class Task(object):
         self.create_range()
         # pre start task to get data 
         if self.isPreviewAble:
-#             q.put((Task.createHelperThread,[0,32 if 32 < self.part_count else self.part_count-1 ,self],1))
-            pass
+            q.put((Task.createHelperThread,[0,32 if 32 < self.part_count else self.part_count-1 ,self],1))
             #  request the end for a little bit 
 #             q.put((createHelperThread,[self.part_count-3 if ( self.part_count-3 ) > 0   else self.part_count-1 ,self.part_count-1,self],1))
         else:
             q.put((Task.createHelperThread,[0,400 if 400 < self.part_count else self.part_count-1 ,self],1))
       
+#         for i  in range(len(self.block_infos)):
+#             if self.block_infos[i]['status'] is None:
+#                 q.put((Task.createHelperThread,[i,i+1,self],2))
 
     def create_range(self):
         start = 0

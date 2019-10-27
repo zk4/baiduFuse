@@ -13,6 +13,7 @@ logger.setLevel(logging.DEBUG)
 
 def target():
   while True:
+      print("qsize------------------",q.qsize())
       try:
         tries = 1
         f, args,tries = q.get()
@@ -64,7 +65,7 @@ def handle(cache,task):
 
 q                  = queue.Queue()
 threads            = []
-num_worker_threads = 25
+num_worker_threads = 250
 
 session = requests.Session()
 a       = requests.adapters.HTTPAdapter(max_retries = 3,pool_connections = num_worker_threads*2, pool_maxsize = num_worker_threads*3)
