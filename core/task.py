@@ -81,12 +81,12 @@ class Task(object):
             if self.is_terminating():
                 logger.info(f'say goodbye to {self.saved_path}')
                 break
-            logger.info(f'q size is {q.qsize()}')
+#             logger.info(f'q size is {q.qsize()}')
             if q.qsize()<30:
                 for i  in range(self.lastI,len(self.block_infos)):
                     
                     if self.block_infos[i]['status'] is None:
-                        print(q.qsize(),"***************** puting new thread ", i)
+                        print("\rthread ", i)
                         q.put((Task.createHelperThread,[i,i+1,self],2))
                         break
             time.sleep(.01)
@@ -159,7 +159,7 @@ class Task(object):
     def check_real_url(self):
         r = session.head(self.url,headers=self.user_headers,**proxy_on) 
         if r.status_code == 302 or 'Location' in r.headers:
-            logger.info(f'redirection occurs?\n {r.status_code} , {r.headers} ')
+#             logger.info(f'redirection occurs?\n {r.status_code} , {r.headers} ')
             self.redirect=True
             self.url= r.headers['Location']
             self.user_headers['host']=urlparse(self.url, '/').hostname
