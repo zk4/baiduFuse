@@ -64,7 +64,7 @@ def handle(cache,task):
 
 q                  = queue.Queue()
 threads            = []
-num_worker_threads = 250
+num_worker_threads = 25
 
 session = requests.Session()
 a       = requests.adapters.HTTPAdapter(max_retries = 3,pool_connections = num_worker_threads*2, pool_maxsize = num_worker_threads*3)
