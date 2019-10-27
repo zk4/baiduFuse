@@ -60,7 +60,7 @@ def handle(cache,task):
                     return
             istart = istart + dataLen
     cache['status'] = "done"
-    logger.info(f'{start} done')
+#     logger.info(f'{start} done')
     with cache["m"]:
         cache["m"].notifyAll()
 

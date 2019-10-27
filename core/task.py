@@ -64,7 +64,7 @@ class Task(object):
         self.url= url
         self.saved_path = saved_path
         self.user_headers=user_headers
-        self.part_size = 65536*8
+        self.part_size = 65536*4
         self.block_infos =[]
         self.current_file_size = 0
         self.file_size = file_size
@@ -80,6 +80,7 @@ class Task(object):
         while True:
             if self.is_terminating():
                 logger.info(f'say goodbye to {self.saved_path}')
+                break
             logger.info(f'q size is {q.qsize()}')
             if q.qsize()<30:
                 for i  in range(self.lastI,len(self.block_infos)):
@@ -88,7 +89,7 @@ class Task(object):
                         print(q.qsize(),"***************** puting new thread ", i)
                         q.put((Task.createHelperThread,[i,i+1,self],2))
                         break
-            time.sleep(.1)
+            time.sleep(.01)
             
 
 
