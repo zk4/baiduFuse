@@ -28,13 +28,7 @@ class PCS():
         else:
             from cloud.autoBDUSS import getBDUSS,cj   
             self.BDUSS = getBDUSS()
-        self.header={
-            'User-Agent': self.user_agent,
-            'cookie':"BDUSS="+self.BDUSS,
-            'User-Agent':self.user_agent,
-            'host': "pcs.baidu.com",
-            'Accept-Encoding':"gzip"
-            }
+
 
     def delete(self,paths):
         url = "http://pcs.baidu.com/rest/2.0/pcs/file"
@@ -151,7 +145,16 @@ class PCS():
         return response.text
 
     def getHeader(self):
-        return self.header
+        app_id="250528"
+        user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36"
+        header={
+            'User-Agent': user_agent,
+            'cookie':"BDUSS="+self.BDUSS,
+            'User-Agent':user_agent,
+            'host': "pcs.baidu.com",
+            'Accept-Encoding':"gzip"
+            }
+        return header
 
     def rename(self, old, new):
         logger.info("rename")
