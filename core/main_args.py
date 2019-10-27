@@ -29,7 +29,7 @@ parser.add_argument("-b",'--BDUSS', type=str, required=False, help='By default, 
 parser.add_argument("-pl",'--preload_level', type=int, required=False, default=10, help='how many dir level do you wnat to preload')
 parser.add_argument("-d",'--debug', action='store_true',  help='debug mode')
 parser.add_argument("-p",'--proxy', action='store_true',default=False,  help='auto proxy at 127.0.0.1:18888 for debug')
-parser.add_argument("-ct",'--cache_timeout', type=int, required=False, default=60, help='how many seconds will folder structure cache timeout')
+parser.add_argument("-ct",'--cache_timeout', type=int, required=False, default=600, help='how many seconds will folder structure cache timeout')
 
 
 mainArgs = parser.parse_args()

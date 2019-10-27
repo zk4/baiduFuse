@@ -251,6 +251,7 @@ class CloudFS(Operations):
     
     # @funcLog
     def open(self, path, flags):
+        logger.info(f'open {path}')
         if path  in self.writing_files:
             return 0
         # method does not have thread race problem, open by one thread only
@@ -417,6 +418,7 @@ class CloudFS(Operations):
 
    
     def release(self, path, fh):
+        logger.info(f'release {path}')
 #         with self.createLock:
         if path in self.writing_files:
             uploading_tmp=self.writing_files[path]['uploading_tmp']
@@ -454,8 +456,8 @@ class CloudFS(Operations):
             return  
         # method does not have thread race problem, release by one thread only
         if path in self.downloading_files:
-#             self.downloading_files[path].terminate()
-#             del self.downloading_files[path]
+            self.downloading_files[path].terminate()
+            del self.downloading_files[path]
 #             uploading_tmp = "./uploading_tmp"+path
 #             logger.info("delete uploading_tmp:", uploading_tmp)
 #             os.remove(uploading_tmp)

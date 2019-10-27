@@ -13,7 +13,7 @@ logger.setLevel(logging.DEBUG)
 
 def target():
   while True:
-      print("qsize------------------",q.qsize())
+#       print("qsize------------------",q.qsize())
       try:
         tries = 1
         f, args,tries = q.get()
@@ -33,7 +33,7 @@ def handle(cache,task):
     r = task.get_bytes({ 'Range': "bytes={0}-{1}" .format(start, start+size-1)})
     istart=start
     if not r.ok:
-        logger.debug(f'{r},{r.text}')
+        logger.info(f'{r},{r.text}')
         cache["error"]=True
         return 
 
@@ -60,12 +60,13 @@ def handle(cache,task):
                     return
             istart = istart + dataLen
     cache['status'] = "done"
+    logger.info(f'{start} done')
     with cache["m"]:
         cache["m"].notifyAll()
 
 q                  = queue.Queue()
 threads            = []
-num_worker_threads = 250
+num_worker_threads = 10
 
 session = requests.Session()
 a       = requests.adapters.HTTPAdapter(max_retries = 3,pool_connections = num_worker_threads*2, pool_maxsize = num_worker_threads*3)

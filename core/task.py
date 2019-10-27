@@ -29,28 +29,27 @@ class Task(object):
     @staticmethod
     def createHelperThread(startIdx,endIdx,task):
         isPreviewAble = task.isPreviewAble
-        preDownloadPart = 30 if isPreviewAble else 30
+#         preDownloadPart = 30 if isPreviewAble else 30
+        preDownloadPart = 0
         for i in range(startIdx,endIdx+preDownloadPart):
             if i >= len(task.block_infos):
                 break
 
             block_info =task.block_infos[i]
-            
-            if block_info["status"] is  None: 
-                block_info["status"]="ing"                       
+            if block_info["status"] is  None:
+                block_info["status"]="ing"
                 q.put((handle,[block_info,task],1))
 
     def __init__(self,url,path,user_headers,file_size):
 
-    
         saved_path = "./tmp"+path
         if not os.path.exists(os.path.dirname(saved_path)):
             try:
                 os.makedirs(os.path.dirname(saved_path))
-            except OSError as exc: 
+            except OSError as exc:
                 # Guard against race condition
                 # don`t use lock as possiable as you can
-                pass         
+                pass
         # almost all the files need to read fast , other wise the app will frozen or exit 
 #         previewableExts={ "mkv","mpv","mp3","mp4","flv","ts","mov","avi","aac","flac","asf","rma","rmvb", \
 #                 "rm","ogg","mpeg","vob","m4a","wma","wmv","3gp","zip","rar","tar","7z","pdf","doc","docx","xls","xlsx","dmg" }
@@ -75,6 +74,25 @@ class Task(object):
         self.redirect =False
         self.check_real_url()
         
+        self.lastI=0
+        
+    def ensure_full_load(self):
+        while True:
+            if self.is_terminating():
+                logger.info(f'say goodbye to {self.saved_path}')
+            logger.info(f'q size is {q.qsize()}')
+            if q.qsize()<30:
+                for i  in range(self.lastI,len(self.block_infos)):
+                    
+                    if self.block_infos[i]['status'] is None:
+                        print(q.qsize(),"***************** puting new thread ", i)
+                        q.put((Task.createHelperThread,[i,i+1,self],2))
+                        break
+            time.sleep(.1)
+            
+
+
+
 
     def get_url(self):
         return self.url
@@ -91,6 +109,7 @@ class Task(object):
             r = self.get_block_range(offset,size)
             c = self.block_infos[r[0]]
             start = time.time()
+            self.lastI=r[0]
 
             maxWaitRound = 10
             curRound = 0
@@ -118,8 +137,8 @@ class Task(object):
                 end = time.time()
                 # no response for 10 secs, just drop it 
                 # TODO this  shoud be configurable
-                if end-start>10:
-                    return None
+#                 if end-start>10:
+#                     return None
                 curRound+=1
 #                 print("wait ",curRound)
 
@@ -162,7 +181,8 @@ class Task(object):
         self.create_range()
         # pre start task to get data 
         if self.isPreviewAble:
-            q.put((Task.createHelperThread,[0,32 if 32 < self.part_count else self.part_count-1 ,self],1))
+            pass
+#             q.put((Task.createHelperThread,[0,32 if 32 < self.part_count else self.part_count-1 ,self],1))
             #  request the end for a little bit 
 #             q.put((createHelperThread,[self.part_count-3 if ( self.part_count-3 ) > 0   else self.part_count-1 ,self.part_count-1,self],1))
         else:
@@ -171,6 +191,7 @@ class Task(object):
 #         for i  in range(len(self.block_infos)):
 #             if self.block_infos[i]['status'] is None:
 #                 q.put((Task.createHelperThread,[i,i+1,self],2))
+        threading.Thread(target=self.ensure_full_load).start()
 
     def create_range(self):
         start = 0
