@@ -1,55 +1,54 @@
 
-Blazing fast on Read. 
+这个项目让你可以挂载百度磁盘。
 <!-- vim-markdown-toc GFM -->
 
-* [feature](#feature)
-* [usage](#usage)
-* [dev](#dev)
-* [todo](#todo)
-* [tips](#tips)
+* [特性](#feature)
+* [使用方法](#usage)
+* [开发](#dev)
+* [待办](#todo)
+* [小技巧](#tips)
   * [mpv (ftp on fuse)](#mpv-ftp-on-fuse)
-* [help](#help)
-* [bla](#bla)
+* [帮助](#help)
+
 
 <!-- vim-markdown-toc -->
-# feature 
-- Support all disk manipulating with baidu cloud,including read,delete,mkdir,cp,mv,etc, highly optimized for reading. Try opening any file , even a big file. You shall see the magic.
-- Read dir in async mode. (You may see empty dir,but with actual files on cloud, that is because some file manager cache dir structure(rancher) when dir data is still on the way back from cloud, you need to get around this by yourself. for example, refresh the dir if the file manager supports. 
-- Auto fetch credential from Chrome browser
-- ! support local encrpyt,default key is `123`, steps:
-  - add prefix `enc.` to  the local file name, ex   `1.mp4 -> enc.1.mp4`
-  - move enc.1.mp4  to mounted baidu disk
-  - enc.1.mp4 is only reasonable from mounted baidu disk, and not when downloaded from baidu official client.
+# 特性
+- 支持所有的百度盘磁盘操作，包括文件、文件夹的增删改，对读做了优化，即使打开远程一个非常大的文件，只要你本地的应用程序支持异步加载。你可以飞快的打开文件。
+- 文件夹以异步读取。（你有可能会在本地看到空文件夹，但你知道在云端文件夹里是有内容的。这是因为，有一些文件管理器会缓存你的文件夹结构，比如finder，ranger 之类的，刷新一下就好）  
+- 自动从 chrome 获取权限
+- 支持本地加密。默认密码为 `123`, 步骤:
+  - 将你想要加密的**本地文件**（还没上传云端的），文件名前面加上`enc.`, ex   `1.mp4 -> enc.1.mp4`
+  - 将 enc.1.mp4  移动到你挂载到本地磁盘里
+  - 通过挂载本地磁盘读取 enc.1.mp4 将会没任何感觉，但如果你通过百度官方客户端下载文件时，你会发现打不开。
 
 ![arch](https://github.com/zk4/baiduFuse/blob/master/img/arch2.jpg)
 
 
 
-# usage 
-- install python 3 
-- install dependencies `pip install -r requirements.txt`
-- instal fuselib 
-  - (Windows)  https://github.com/billziss-gh/winfsp
+# 使用方法 
+- 安装 python 3 
+- 安装依赖 `pip install -r requirements.txt`
+- 安装 fuselib， 因为 mac 是我的开发环境，最没问题的就是 mac 版，其他版本只能说理论没问题。
   - (Mac)    https://osxfuse.github.io/
-  - (Linux)  https://github.com/libfuse/libfuse
-- login in http://pan.baidu.com with **chrome browser** (for the credential to fetch )
-- open fuse in shell
-  -  mac  - stable
+  - (Mac)    https://osxfuse.github.io/  
+  - (Windows)  https://github.com/billziss-gh/winfsp
+
+- 通过 **chrome** 浏览器登陆自动拿权限  http://pan.baidu.com
+- 进入 shell
+  -  mac 平台
     ``` bash
     chmod 777 x.sh
     ./x.sh
     ```
 
-
-
-  -  windows - still buggy. Get BDUSS from Chrome may encounter permission problem, you can mannually set it . mmap does not work. Some PR  on this would be great help.
+  -  windows 平台 - 还是有很多 bug，通过 chrome 拿 BDUSS 可能会有权限问题,你可以手动指定，BDUSS 怎么拿可以自己网上搜一下哈。 
   ``` bat
   python x.py -m 'mnt2' -k 123 -d -b  <BDUSS>
   ```
 
 ![demo](https://github.com/zk4/baiduFuse/blob/master/img/d.gif)
 
-# dev 
+# 开发 
 ``` bash
 # some dev tools, just for convenience. You could skip this,then you need to config the dev enviroment yourself
 brew install watchexec 
@@ -63,7 +62,7 @@ make test
 # create requirements.txt 
 make dist 
 ```
-# todo 
+# 待办 
 - [ ] improvment!!: reduce local disk size,( maybe download in memory)
 - [ ] improvment: when write with finder on mac, a lot of garbage file occurs with `.` or `_`  in the name prefix 
 - [ ] make encrpytion verisoned.
@@ -93,6 +92,4 @@ mpv    --cache=no ftp://192.168.1.15:2121/锦绣良缘粤语Gotv/锦绣良缘19.
 python3 x.py --help
 
 ```
-
-# bla
-why is this document written in English,cause writting Chiense in vim is pain in the ass.  
+ 
