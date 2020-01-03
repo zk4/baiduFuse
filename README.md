@@ -33,7 +33,11 @@
 - 安装依赖 `pip install -r requirements.txt`
 - 安装 fuselib， 因为 mac 是我的开发环境，最没问题的就是 mac 版，其他版本只能说理论没问题。
   - (Mac)    https://osxfuse.github.io/
-  - (Mac)    https://osxfuse.github.io/  
+  - (Linux)    https://osxfuse.github.io/  
+     ```bash
+     拿 centos 举例
+      yum install fuse fuse-devel
+     ```
   - (Windows)  https://github.com/billziss-gh/winfsp
 
 - 通过 **chrome** 浏览器登陆自动拿权限  http://pan.baidu.com
