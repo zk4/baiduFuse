@@ -1,5 +1,5 @@
 
-> 百度 rest 接口基本不可用了. 这个项目基于 rest, 所以读文件基本废了. 时不时会抽风. 有个新思路, 正在研究中. 
+> 百度 rest 接口基本不可用了. 这个项目基于 rest, 所以读文件基本废了. 时不时会抽风. 有个新思路, 正在研究中. 欢迎讨论 [链接](https://github.com/zk4/baiduFuse/issues?q=is%3Aissue+is%3Aopen+label%3A%E6%96%B0%E7%89%88%E6%9C%AC%E8%AE%A8%E8%AE%BA)
 
 这个项目让你可以挂载百度磁盘。
 <!-- vim-markdown-toc GFM -->
